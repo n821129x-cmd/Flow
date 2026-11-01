@@ -118,8 +118,29 @@ a{color:var(--blue-d)}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 
 .wrap{max-width:1400px;margin:0 auto;padding:20px}
+.app{display:flex;align-items:flex-start;max-width:1680px;margin:0 auto}
+.app-main{flex:1;min-width:0}
+.side{width:248px;flex:none;position:sticky;top:calc(var(--hh,120px) + 14px);margin:18px 0 0 18px;
+  max-height:calc(100vh - var(--hh,120px) - 28px);display:flex;flex-direction:column;
+  background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.side-h{padding:12px 14px 10px;border-bottom:1px solid var(--rule-2);display:flex;flex-direction:column;gap:8px}
+.side-h .t{display:flex;align-items:baseline;gap:8px;font-weight:700;font-size:14.5px}
+.side-h .t em{font-style:normal;font-family:"Barlow",sans-serif;color:var(--ink-3);font-weight:500;font-size:12.5px}
+.side-h .t button{margin-left:auto}
+.side-h select,.side-h input{width:100%;padding:5px 9px;border:1px solid var(--rule);border-radius:7px;background:var(--surface-2);font-size:13px}
+.side-list{overflow-y:auto;padding:6px 0 10px;flex:1}
+.side-g{font-size:11.5px;font-weight:700;color:var(--ink-3);padding:10px 14px 4px;display:flex;gap:6px}
+.side-g em{font-style:normal;font-weight:500;margin-left:auto;font-family:"Barlow",sans-serif}
+.pitem{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;
+  padding:7px 14px 7px 11px;cursor:pointer}
+.pitem:hover{background:var(--surface-2)}
+.pitem.on{background:var(--blue-soft);border-left-color:var(--blue)}
+.pitem .pn2{display:block;font-size:14px;font-weight:500;line-height:1.4;word-break:break-word}
+.pitem.on .pn2{color:var(--blue-d)}
+.pitem .pm2{display:block;font-size:11.5px;color:var(--ink-3);line-height:1.4}
+.side-empty{padding:14px;font-size:12.5px;color:var(--ink-3)}
 .shell{display:flex;gap:18px;align-items:flex-start;max-width:1400px;margin:0 auto;padding:18px 20px 80px}
-.rail{width:206px;flex:none;position:sticky;top:168px}
+.rail{width:196px;flex:none;position:sticky;top:calc(var(--hh,120px) + 14px)}
 .rail h4{font-size:12px;color:var(--ink-3);margin:12px 0 8px 6px;font-weight:700}
 .rail h4:first-child{margin-top:0}
 .step{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:9px;padding:9px 12px;margin-bottom:3px;cursor:pointer}
@@ -254,6 +275,12 @@ table.cmp td.st{width:150px}
 @keyframes sl{0%{transform:scaleX(0)}50%{transform:scaleX(.7)}100%{transform:scaleX(1);opacity:.2}}
 
 @media (max-width:980px){
+  .app{display:block}
+  .side{position:static;margin:12px 14px 0;max-height:none;width:auto}
+  .side-list{display:flex;gap:6px;overflow-x:auto;padding:8px 10px}
+  .side-g{display:none}
+  .pitem{flex:none;width:auto;max-width:200px;border:1px solid var(--rule);border-radius:8px;padding:5px 11px}
+  .pitem.on{border-color:var(--blue)}
   .shell{display:block;padding:14px 14px 70px}
   .rail{width:auto;position:static;display:flex;gap:6px;overflow-x:auto;padding-bottom:10px}
   .rail h4{display:none}
@@ -791,6 +818,32 @@ function pcard(p){
     '<span class="pn">'+esc(p.name||"未命名專案")+'</span>'+
     '<span class="pm">'+esc(ownerOf(p))+(p.vendor?'　承商 '+esc(p.vendor):"")+'</span>'+
     '<span class="pm">最後更新 '+esc(fmtTime(p.updatedAt))+'　'+esc(shortUser(p.updatedBy))+'</span></button>';}
+function renderSide(){
+  var owners=ownerList(),q=String(S.pq||"").trim().toLowerCase();
+  var h='<div class="side-h"><div class="t">專案<em>'+S.projects.length+'</em>'+
+    (canEdit()?'<button class="btn sm" data-act="pj-home" title="新增專案">＋ 新增</button>':'')+'</div>';
+  if(owners.length){
+    h+='<select data-act="own-sel" aria-label="依業主篩選"><option value="">全部業主單位</option>'+
+      owners.map(function(o){return '<option value="'+esc(o.name)+'"'+(S.ownerFilter===o.name?" selected":"")+'>'+
+        esc(o.name)+'（'+o.count+'）</option>';}).join("")+'</select>';}
+  h+='<input type="search" id="pj-q" placeholder="搜尋專案" value="'+esc(S.pq||"")+'"></div>';
+  return h+'<div class="side-list">'+sideList(owners,q)+'</div>';
+}
+function sideList(owners,q){
+  var h="",any=false;
+  owners.filter(function(o){return !S.ownerFilter||o.name===S.ownerFilter;}).forEach(function(o){
+    var list=S.projects.filter(function(p){return ownerOf(p)===o.name&&
+        (!q||(String(p.name||"")+String(p.code||"")+String(p.vendor||"")).toLowerCase().indexOf(q)>=0);})
+      .sort(function(a,b){return String(a.name||"").localeCompare(String(b.name||""),"zh-Hant");});
+    if(!list.length)return;any=true;
+    h+='<div class="side-g">'+esc(o.name)+'<em>'+list.length+'</em></div>';
+    list.forEach(function(p){
+      h+='<button class="pitem'+(p.id===S.pid?" on":"")+'" data-act="pj-open" data-id="'+esc(p.id)+'">'+
+        '<span class="pn2">'+esc(p.name||"未命名專案")+'</span>'+
+        '<span class="pm2">'+esc(p.status||"進行中")+' · '+(p.itemCount||0)+' 項'+(p.code?' · '+esc(p.code):'')+'</span></button>';});
+  });
+  return any?h:'<div class="side-empty">'+(S.projects.length?"沒有符合的專案":"還沒有專案")+'</div>';
+}
 function renderProjects(){
   var n=S.projects.length,owners=ownerList();
   var names=owners.filter(function(o){return o.name!=="未指定業主單位";}).map(function(o){return o.name;});
@@ -1109,8 +1162,10 @@ function render(){
     (ae.dataset.act+"|"+(ae.dataset.f||"")+"|"+(ae.dataset.id||ae.dataset.k||"")+"|"+(ae.dataset.sid||"")):(ae?ae.id:"");
   var sel=null;try{if(ae&&ae.setSelectionRange)sel=[ae.selectionStart,ae.selectionEnd];}catch(e){}
   renderTop();
+  var hd=document.querySelector(".head");if(hd)document.documentElement.style.setProperty("--hh",hd.offsetHeight+"px");
   var root=document.getElementById("root");
-  if(!S.pid||!S.D){root.innerHTML=renderProjects();}
+  var side='<aside class="side">'+renderSide()+'</aside>';
+  if(!S.pid||!S.D){root.innerHTML='<div class="app">'+side+'<div class="app-main">'+renderProjects()+'</div></div>';}
   else{
     var g=gateP(),rail='<h4>驗收流程</h4>';
     rail+='<button class="step'+(S.view==="gate"?" on":"")+'" data-go="gate"><div class="step-head">'+
@@ -1140,7 +1195,7 @@ function render(){
     else if(S.view==="items")body=renderItemsAdmin();
     else if(S.view==="set")body=renderSettings();
     else body=renderStage(S.view);
-    root.innerHTML='<div class="shell"><nav class="rail">'+rail+'</nav><main>'+body+'</main></div>';
+    root.innerHTML='<div class="app">'+side+'<div class="app-main"><div class="shell"><nav class="rail">'+rail+'</nav><main>'+body+'</main></div></div></div>';
   }
   if(akey){
     var all=document.querySelectorAll("[data-act],input[id],textarea[id],select[id]"),el=null;
@@ -1155,6 +1210,10 @@ function render(){
 }
 
 /* ---------- 事件 ---------- */
+document.addEventListener("input",function(ev){
+  if(ev.target&&ev.target.id==="pj-q"){S.pq=ev.target.value;
+    var l=document.querySelector(".side-list");if(l)l.innerHTML=sideList(ownerList(),String(S.pq).trim().toLowerCase());}
+});
 document.addEventListener("click",function(ev){
   var t=ev.target,go=t.closest("[data-go]");
   if(go){S.view=go.dataset.go;render();window.scrollTo(0,0);return;}
@@ -1199,7 +1258,7 @@ document.addEventListener("click",function(ev){
       S.D=d;S.pid=d.project.id;S.view="gate";render();return reloadProjects();}).catch(function(){});
     return;}
   if(a==="pj-open"){openProject(b.dataset.id);return;}
-  if(a==="pj-back"){dropSubs();S.pid=null;S.D=null;render();return;}
+  if(a==="pj-back"||a==="pj-home"){dropSubs();S.pid=null;S.D=null;render();window.scrollTo(0,0);if(a==="pj-home")setTimeout(function(){var n=document.getElementById("np-name");if(n)n.focus();},50);return;}
   if(a==="pj-del"){
     ask("刪除專案","「"+(D().project.name||"未命名專案")+"」的所有項目、檢核狀態與會議紀錄都會刪除，無法復原。","刪除",true)
       .then(function(ok){
@@ -1259,6 +1318,7 @@ document.addEventListener("click",function(ev){
 
 document.addEventListener("change",function(ev){
   var el=ev.target,a=el.dataset?el.dataset.act:null;
+  if(a==="own-sel"){S.ownerFilter=el.value;render();return;}
   if(!canEdit()&&(a||(el.dataset&&el.dataset.up))&&el.type!=="search"){
     toast(AUTH.user?"這個帳號沒有編輯權限":"請先登入才能編輯");render();return;}
   if(el.dataset&&el.dataset.up){
@@ -1469,7 +1529,7 @@ function openProject(id){
 function reload(){ refresh(); return Promise.resolve(); }
 function reloadProjects(){ render(); return Promise.resolve(); }
 
-var NAV_ACTS={reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
+var NAV_ACTS={"pj-home":1,reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
 var AUTH={user:null};
 function canEdit(){
   if(!AUTH.user||!AUTH.user.email)return false;
