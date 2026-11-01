@@ -298,10 +298,7 @@ table.cmp td.st{width:150px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+<script src="config.js"></script>
 </head>
 <body>
 
@@ -426,7 +423,7 @@ function assemble(){
     items:M.items.slice().sort(function(a,b){return (a.ord||0)-(b.ord||0);}),
     stages:M.stages,minutes:M.minutes.slice(),files:M.files};
 }
-function refresh(){ if(S.pid){S.D=assemble();} render(); }
+function refresh(){ if(S._mute){S._dirty=true;return;} if(S.pid){S.D=assemble();} render(); }
 
 /** 伺服器函式的本地實作，簽章與 Apps Script 版一致 */
 var SRV={
@@ -862,7 +859,7 @@ function renderProjects(){
     '<div class="hint">建立時會自動套用標準 25 項清單（八大類），四輪共用。</div></div></div>';
   if(!n)return h+'<div class="card"><div class="empty"><b>還沒有專案</b>'+
     (canEdit()?'先在上面建立第一個，或<br><button class="btn primary" style="margin-top:10px" data-act="seed">匯入既有資料（力行、福國）</button>'
-      :(AUTH.user?'這個帳號沒有編輯權限。':'目前沒有資料，或資料庫尚未設定。'))+'</div></div></div>';
+      :'目前沒有資料，或資料庫尚未設定。')+'</div></div></div>';
   if(owners.length>1){
     h+='<div class="chips"><button class="chip'+(S.ownerFilter?"":" on")+'" data-act="own" data-o="">全部<em>'+n+'</em></button>';
     owners.forEach(function(o){
@@ -1119,8 +1116,8 @@ function renderTop(){
     '<span><i class="'+(RT.db?"on":"off")+'"></i>資料庫</span>'+
     
     '<span>v3</span></span>';
-  var meTag=rt+(AUTH.user
-    ?'<span class="who">'+esc(AUTH.user.email)+(canEdit()?'':'（無編輯權限）')+'<button class="btn sm" data-act="logout">登出</button></span>'
+  var meTag=rt+(canEdit()
+    ?'<span class="who">操作者<input id="who" data-fkey="who" placeholder="姓名" value="'+esc(S.user)+'"><button class="btn sm" data-act="logout">登出</button></span>'
     :'<span class="who">唯讀檢視<button class="btn sm primary" data-act="login">登入編輯</button></span>');
   if(!S.pid||!S.D){
     cb.innerHTML='<span class="cur">專案清單</span>';
@@ -1221,9 +1218,9 @@ document.addEventListener("click",function(ev){
   if(!b||/^(INPUT|TEXTAREA|SELECT)$/.test(b.tagName))return;
   var a=b.dataset.act;
   if(a==="login"){doLogin();return;}
-  if(a==="logout"){firebase.auth().signOut();return;}
+  if(a==="logout"){AUTH.editor=false;AUTH.key="";try{localStorage.removeItem("acc.key");}catch(e){}applyRO();render();return;}
   if(a==="seed"){runSeed(b);return;}
-  if(!canEdit()&&!NAV_ACTS[a]){ev.preventDefault();toast(AUTH.user?"這個帳號沒有編輯權限":"請先登入才能編輯");return;}
+  if(!canEdit()&&!NAV_ACTS[a]){ev.preventDefault();toast("請先按右上角「登入編輯」");return;}
 
   if(a==="reload"){reload();return;}
   if(a==="cat-tog"){var no=b.dataset.no;setCol(no,!isCol(no));render();return;}
@@ -1320,7 +1317,7 @@ document.addEventListener("change",function(ev){
   var el=ev.target,a=el.dataset?el.dataset.act:null;
   if(a==="own-sel"){S.ownerFilter=el.value;render();return;}
   if(!canEdit()&&(a||(el.dataset&&el.dataset.up))&&el.type!=="search"){
-    toast(AUTH.user?"這個帳號沒有編輯權限":"請先登入才能編輯");render();return;}
+    toast("請先按右上角「登入編輯」");render();return;}
   if(el.dataset&&el.dataset.up){
     var fs=Array.prototype.slice.call(el.files||[]);
     var tg={t:el.dataset.t,id:el.dataset.id,stage:el.dataset.stage};
@@ -1530,46 +1527,80 @@ function reload(){ refresh(); return Promise.resolve(); }
 function reloadProjects(){ render(); return Promise.resolve(); }
 
 var NAV_ACTS={"pj-home":1,reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
-var AUTH={user:null};
-function canEdit(){
-  if(!AUTH.user||!AUTH.user.email)return false;
-  var list=(window.EDITORS||[]).map(function(e){return String(e).toLowerCase();});
-  return list.indexOf(String(AUTH.user.email).toLowerCase())>=0;
-}
+var AUTH={key:"",editor:false};
+try{AUTH.key=localStorage.getItem("acc.key")||"";}catch(e){}
+function canEdit(){return !!AUTH.editor;}
 function applyRO(){
   document.body.classList.toggle("ro",!canEdit());
   var bar=document.getElementById("robar");
   if(!canEdit()){
     if(!bar){bar=document.createElement("div");bar.id="robar";bar.className="robar";
       var hd=document.querySelector(".head");hd.insertBefore(bar,hd.children[1]);}
-    bar.textContent=AUTH.user?"目前為唯讀：這個帳號不在編輯名單內。":"目前為唯讀檢視。需要修改請按右上角「登入編輯」。";
+    bar.textContent="目前為唯讀檢視。需要修改請按右上角「登入編輯」並輸入編輯密碼。";
   }else if(bar)bar.remove();
 }
+/* ---------- Google 試算表後端（Apps Script 網頁應用程式） ---------- */
+var API=String(window.API_URL||"").trim();
+function apiGet(q){return fetch(API+(API.indexOf("?")<0?"?":"&")+q+"&_="+Date.now(),{cache:"no-store"})
+  .then(function(r){return r.json();});}
+function apiPost(o){return fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
+  body:JSON.stringify(o)}).then(function(r){return r.json();})
+  .then(function(r){if(!r||!r.ok)throw new Error(r&&r.error==="not_editor"?"編輯密碼錯誤或已變更":(r&&r.error)||"寫入失敗");return r;});}
+function checkKey(k){return apiGet("op=check&key="+encodeURIComponent(k)).then(function(r){return !!(r&&r.editor);});}
 function doLogin(){
-  var p=new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(p)["catch"](function(e){
-    if(e&&(e.code==="auth/popup-blocked"||e.code==="auth/operation-not-supported-in-this-environment"))
-      return firebase.auth().signInWithRedirect(p);
-    toast("登入失敗"+(e&&e.code?"（"+e.code+"）":""));});
+  dialog({title:"登入編輯",message:"輸入編輯密碼（由管理者在試算表「驗收系統 → 設定編輯密碼」設定）。",
+    fields:[{key:"k",label:"編輯密碼",placeholder:""}],okLabel:"登入"}).then(function(v){
+    if(!v||!v.k)return;
+    return checkKey(v.k).then(function(ok){
+      if(!ok){toast("密碼不正確");return;}
+      AUTH.key=v.k;AUTH.editor=true;try{localStorage.setItem("acc.key",v.k);}catch(e){}
+      applyRO();render();toast("已登入，可以編輯");});
+  })["catch"](function(){toast("無法連線後端");});
 }
-/* Firestore 轉接層：與原 Artifact db 介面相同（doc().set/delete/onSnapshot、collection().onSnapshot） */
-function FDB(fs){
-  function wrap(s){return {id:s.id,exists:s.exists,data:function(){return s.data();}};}
+var CACHE={},REV=-1,LIS=[],PENDING=0;
+function lastSeg(p){return p.slice(p.lastIndexOf("/")+1);}
+function parentOf(p){return p.slice(0,p.lastIndexOf("/"));}
+function fire(l){
+  if(l.type==="doc"){var d=CACHE[l.path];l.cb({id:lastSeg(l.path),exists:!!d,data:function(){return d||{};}});}
+  else l.cb({docs:Object.keys(CACHE).filter(function(k){return parentOf(k)===l.path;})
+    .map(function(k){return {id:lastSeg(k),exists:true,data:function(){return CACHE[k];}};})});
+}
+function emit(){S._mute=true;S._dirty=false;try{LIS.slice().forEach(fire);}finally{S._mute=false;}if(S._dirty)refresh();}
+function loadAll(){
+  return apiGet("op=all").then(function(r){
+    if(!r||!r.ok)throw new Error("read_failed");
+    var c={};(r.docs||[]).forEach(function(d){c[d.path]=d.data;});CACHE=c;REV=r.rev;emit();
+  });
+}
+function GDB(){
+  var pend=[],timer=null,waiters=[];
+  function flush(){
+    var ws=pend,wt=waiters;pend=[];waiters=[];timer=null;PENDING++;
+    apiPost({key:AUTH.key,user:me(),writes:ws}).then(function(r){REV=r.rev;wt.forEach(function(w){w.res();});})
+      ["catch"](function(e){wt.forEach(function(w){w.rej(e);});loadAll()["catch"](function(){});})
+      .then(function(){PENDING--;});
+  }
+  function queue(w){
+    if(!canEdit())return Promise.reject(new Error("請先登入編輯"));
+    pend=pend.filter(function(x){return x.path!==w.path;});pend.push(w);
+    return new Promise(function(res,rej){waiters.push({res:res,rej:rej});if(!timer)timer=setTimeout(flush,250);});
+  }
+  function sub(l){LIS.push(l);fire(l);return function(){LIS=LIS.filter(function(x){return x!==l;});};}
   return {
-    doc:function(path){var r=fs.doc(path);return {
-      set:function(b){return r.set(b);},
-      delete:function(){return r["delete"]();},
-      onSnapshot:function(ok,err){return r.onSnapshot(function(s){ok(wrap(s));},err);}};},
-    collection:function(path){var c=fs.collection(path);return {
-      onSnapshot:function(ok,err){return c.onSnapshot(function(sn){ok({docs:sn.docs.map(wrap)});},err);}};},
+    doc:function(path){return {
+      set:function(b){CACHE[path]=JSON.parse(JSON.stringify(b));emit();return queue({op:"set",path:path,data:b});},
+      "delete":function(){delete CACHE[path];emit();return queue({op:"delete",path:path});},
+      onSnapshot:function(ok){return sub({type:"doc",path:path,cb:ok});}};},
+    collection:function(path){return {onSnapshot:function(ok){return sub({type:"col",path:path,cb:ok});}};},
     batchWrite:function(list){
-      var chunks=[];for(var i=0;i<list.length;i+=400)chunks.push(list.slice(i,i+400));
+      var chunks=[];for(var i=0;i<list.length;i+=150)chunks.push(list.slice(i,i+150));
       return chunks.reduce(function(p,ch){return p.then(function(){
-        var b=fs.batch();ch.forEach(function(w){b.set(fs.doc(w.path),w.data);});return b.commit();});},Promise.resolve());}
+        return apiPost({key:AUTH.key,user:me(),writes:ch.map(function(w){return {op:"set",path:w.path,data:w.data};})});});},
+        Promise.resolve()).then(function(){return loadAll();});}
   };
 }
 function runSeed(btn){
-  if(!canEdit()){toast("請先以編輯帳號登入");return;}
+  if(!canEdit()){toast("請先登入編輯");return;}
   btn.disabled=true;btn.textContent="匯入中…";
   fetch("seed.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("找不到 seed.json");return r.json();})
     .then(function(d){return RT.db.batchWrite(d.docs).then(function(){return d.docs.length;});})
@@ -1577,30 +1608,31 @@ function runSeed(btn){
     ["catch"](function(e){btn.disabled=false;btn.textContent="匯入既有資料（力行、福國）";
       toast("匯入失敗："+(e&&e.message?e.message:e));});
 }
+function poll(){
+  if(PENDING||document.hidden)return;
+  apiGet("op=rev").then(function(r){if(r&&r.ok&&r.rev!==REV&&!PENDING)return loadAll();})["catch"](function(){});
+}
 (function boot(){
-  render();
-  if(!window.firebase||!window.FIREBASE_CONFIG||!window.FIREBASE_CONFIG.projectId){
+  try{S.user=localStorage.getItem("acc.user")||"";}catch(e){}
+  applyRO();render();
+  if(!API){
     document.getElementById("root").innerHTML=
-      '<div class="wrap"><div class="notice bad">尚未設定 Firebase（firebase-config.js），目前無法讀取資料。</div></div>';
+      '<div class="wrap"><div class="notice bad">尚未設定後端網址（config.js 的 API_URL），目前無法讀取資料。</div></div>';
     return;
   }
-  firebase.initializeApp(window.FIREBASE_CONFIG);
-  var fs=firebase.firestore();
-  try{fs.settings({ignoreUndefinedProperties:true,merge:true});}catch(e){}
-  RT.db=FDB(fs);RT.assets=null;RT.downloads=null;
-  applyRO();
-  firebase.auth().onAuthStateChanged(function(u){
-    AUTH.user=u||null;
-    S.user=u?(u.displayName||u.email):"";
-    applyRO();render();
-  });
+  RT.db=GDB();RT.assets=null;RT.downloads=null;
   RT.db.collection("projects").onSnapshot(function(sn){
     M.projects=sn.docs.map(function(x){var v=thaw(x);v.id=x.id;return v;});
     S.projects=SRV.bootstrap().projects;
     refresh();
-  },function(e){console.error(e);
+  });
+  loadAll()["catch"](function(e){
     document.getElementById("root").insertAdjacentHTML("afterbegin",
-      '<div class="wrap"><div class="notice bad">讀取資料失敗（'+esc(e&&e.code||e)+'），請確認 Firestore 規則已設定。</div></div>');});
+      '<div class="wrap"><div class="notice bad">讀取資料失敗，請確認 Apps Script 已部署為「所有人」可存取。</div></div>');});
+  if(AUTH.key)checkKey(AUTH.key).then(function(ok){AUTH.editor=ok;if(!ok){AUTH.key="";try{localStorage.removeItem("acc.key");}catch(e){}}
+    applyRO();render();})["catch"](function(){});
+  setInterval(poll,15000);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)poll();});
 })();
 </script>
 </body>
