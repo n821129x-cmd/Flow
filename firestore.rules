@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 可以編輯的 Google 帳號（小寫），要和 firebase-config.js 的 EDITORS 一致
+    function isEditor() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() in [
+          'n821129x@gmail.com'
+        ];
+    }
+    match /{document=**} {
+      allow read: if true;          // 任何人可檢視
+      allow write: if isEditor();   // 只有名單內的人可修改
+    }
+  }
+}
