@@ -747,7 +747,7 @@ function dialog(opt){
       (opt.message?'<p>'+esc(opt.message)+'</p>':"")+
       fields.map(function(f,i){
         return '<label><span>'+esc(f.label)+'</span>'+
-          '<input class="inline" data-fi="'+i+'" placeholder="'+esc(f.placeholder||"")+
+          '<input class="inline" data-fi="'+i+'" type="'+(f.type||"text")+'" autocomplete="'+(f.ac||"off")+'" placeholder="'+esc(f.placeholder||"")+
           '" value="'+esc(f.value||"")+'"></label>';}).join("")+
       '<div class="modal-ft">'+
       '<button class="btn" data-mx="0">取消</button>'+
@@ -1154,7 +1154,7 @@ function renderTop(){
     
     '<span>v3</span></span>';
   var meTag=rt+(canEdit()
-    ?'<span class="who">操作者<input id="who" data-fkey="who" placeholder="姓名" value="'+esc(S.user)+'"><button class="btn sm" data-act="logout">登出</button></span>'
+    ?'<span class="who">操作者 <b style="color:var(--ink)">'+esc(AUTH.user)+'</b><button class="btn sm" data-act="pw">改密碼</button><button class="btn sm" data-act="logout">登出</button></span>'
     :'<span class="who">唯讀檢視<button class="btn sm primary" data-act="login">登入編輯</button></span>');
   if(!S.pid||!S.D){
     cb.innerHTML='<span class="cur">專案清單</span>';
@@ -1255,7 +1255,8 @@ document.addEventListener("click",function(ev){
   if(!b||/^(INPUT|TEXTAREA|SELECT)$/.test(b.tagName))return;
   var a=b.dataset.act;
   if(a==="login"){doLogin();return;}
-  if(a==="logout"){AUTH.editor=false;AUTH.key="";try{localStorage.removeItem("acc.key");}catch(e){}applyRO();render();return;}
+  if(a==="logout"){doLogout();return;}
+  if(a==="pw"){doPassword();return;}
   if(a==="seed"){runSeed(b);return;}
   if(!canEdit()&&!NAV_ACTS[a]){ev.preventDefault();toast("請先按右上角「登入編輯」");return;}
 
@@ -1564,8 +1565,8 @@ function reload(){ refresh(); return Promise.resolve(); }
 function reloadProjects(){ render(); return Promise.resolve(); }
 
 var NAV_ACTS={"pj-home":1,reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
-var AUTH={key:"",editor:false};
-try{AUTH.key=localStorage.getItem("acc.key")||"";}catch(e){}
+var AUTH={token:"",user:"",role:"",editor:false};
+try{AUTH.token=localStorage.getItem("acc.token")||"";}catch(e){}
 function canEdit(){return !!AUTH.editor;}
 function applyRO(){
   document.body.classList.toggle("ro",!canEdit());
@@ -1573,27 +1574,48 @@ function applyRO(){
   if(!canEdit()){
     if(!bar){bar=document.createElement("div");bar.id="robar";bar.className="robar";
       var hd=document.querySelector(".head");hd.insertBefore(bar,hd.children[1]);}
-    bar.textContent="目前為唯讀檢視。需要修改請按右上角「登入編輯」並輸入編輯密碼。";
+    bar.textContent="目前為唯讀檢視。需要修改請按右上角「登入編輯」，輸入帳號密碼。";
   }else if(bar)bar.remove();
 }
 /* ---------- Google 試算表後端（Apps Script 網頁應用程式） ---------- */
 var API=String(window.API_URL||"").trim();
 function apiGet(q){return fetch(API+(API.indexOf("?")<0?"?":"&")+q+"&_="+Date.now(),{cache:"no-store"})
   .then(function(r){return r.json();});}
+var ERRS={not_editor:"登入已過期，請重新登入",bad_login:"帳號或密碼不正確",short_password:"新密碼至少 4 個字"};
 function apiPost(o){return fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
   body:JSON.stringify(o)}).then(function(r){return r.json();})
-  .then(function(r){if(!r||!r.ok)throw new Error(r&&r.error==="not_editor"?"編輯密碼錯誤或已變更":(r&&r.error)||"寫入失敗");return r;});}
-function checkKey(k){return apiGet("op=check&key="+encodeURIComponent(k)).then(function(r){return !!(r&&r.editor);});}
-function doLogin(){
-  dialog({title:"登入編輯",message:"輸入編輯密碼（由管理者在試算表「驗收系統 → 設定編輯密碼」設定）。",
-    fields:[{key:"k",label:"編輯密碼",placeholder:""}],okLabel:"登入"}).then(function(v){
-    if(!v||!v.k)return;
-    return checkKey(v.k).then(function(ok){
-      if(!ok){toast("密碼不正確");return;}
-      AUTH.key=v.k;AUTH.editor=true;try{localStorage.setItem("acc.key",v.k);}catch(e){}
-      applyRO();render();toast("已登入，可以編輯");});
-  })["catch"](function(){toast("無法連線後端");});
+  .then(function(r){if(!r||!r.ok){var e=new Error(ERRS[r&&r.error]||(r&&r.error)||"寫入失敗");
+    if(r&&r.error==="not_editor"&&o.token){setAuth(null);}throw e;}return r;});}
+function setAuth(r){
+  if(r){AUTH.token=r.token||AUTH.token;AUTH.user=r.user;AUTH.role=r.role;AUTH.editor=true;S.user=r.user;}
+  else{AUTH.token="";AUTH.user="";AUTH.role="";AUTH.editor=false;S.user="";}
+  try{if(AUTH.token)localStorage.setItem("acc.token",AUTH.token);else localStorage.removeItem("acc.token");}catch(e){}
+  applyRO();render();
 }
+function doLogin(){
+  dialog({title:"登入編輯",message:"請輸入帳號與密碼。帳號由管理者在試算表「驗收系統」選單建立。",
+    fields:[{key:"u",label:"帳號",ac:"username"},{key:"p",label:"密碼",type:"password",ac:"current-password"}],okLabel:"登入"})
+  .then(function(v){
+    if(!v)return;
+    if(!v.u||!v.p){toast("請輸入帳號與密碼");return;}
+    return apiPost({op:"login",user:v.u,password:v.p}).then(function(r){setAuth(r);toast("已登入："+r.user);});
+  })["catch"](function(e){toast(e&&e.message?e.message:"無法連線後端");});
+}
+function doLogout(){
+  var t=AUTH.token;setAuth(null);
+  if(t)apiPost({op:"logout",token:t})["catch"](function(){});
+}
+function doPassword(){
+  dialog({title:"修改密碼",fields:[{key:"o",label:"目前密碼",type:"password",ac:"current-password"},
+    {key:"n",label:"新密碼（至少 4 個字）",type:"password",ac:"new-password"},
+    {key:"n2",label:"再輸入一次新密碼",type:"password",ac:"new-password"}],okLabel:"更新"})
+  .then(function(v){
+    if(!v)return;
+    if(v.n!==v.n2){toast("兩次輸入的新密碼不同");return;}
+    return apiPost({op:"password",token:AUTH.token,old:v.o,password:v.n}).then(function(){toast("密碼已更新");});
+  })["catch"](function(e){toast(e&&e.message?e.message:"更新失敗");});
+}
+function checkToken(t){return apiGet("op=me&token="+encodeURIComponent(t));}
 var CACHE={},REV=-1,LIS=[],PENDING=0;
 function lastSeg(p){return p.slice(p.lastIndexOf("/")+1);}
 function parentOf(p){return p.slice(0,p.lastIndexOf("/"));}
@@ -1613,7 +1635,7 @@ function GDB(){
   var pend=[],timer=null,waiters=[];
   function flush(){
     var ws=pend,wt=waiters;pend=[];waiters=[];timer=null;PENDING++;
-    apiPost({key:AUTH.key,user:me(),writes:ws}).then(function(r){REV=r.rev;wt.forEach(function(w){w.res();});})
+    apiPost({token:AUTH.token,writes:ws}).then(function(r){REV=r.rev;wt.forEach(function(w){w.res();});})
       ["catch"](function(e){wt.forEach(function(w){w.rej(e);});loadAll()["catch"](function(){});})
       .then(function(){PENDING--;});
   }
@@ -1632,7 +1654,7 @@ function GDB(){
     batchWrite:function(list){
       var chunks=[];for(var i=0;i<list.length;i+=150)chunks.push(list.slice(i,i+150));
       return chunks.reduce(function(p,ch){return p.then(function(){
-        return apiPost({key:AUTH.key,user:me(),writes:ch.map(function(w){return {op:"set",path:w.path,data:w.data};})});});},
+        return apiPost({token:AUTH.token,writes:ch.map(function(w){return {op:"set",path:w.path,data:w.data};})});});},
         Promise.resolve()).then(function(){return loadAll();});}
   };
 }
@@ -1650,7 +1672,6 @@ function poll(){
   apiGet("op=rev").then(function(r){if(r&&r.ok&&r.rev!==REV&&!PENDING)return loadAll();})["catch"](function(){});
 }
 (function boot(){
-  try{S.user=localStorage.getItem("acc.user")||"";}catch(e){}
   applyRO();render();
   if(!API){
     document.getElementById("root").innerHTML=
@@ -1666,8 +1687,8 @@ function poll(){
   loadAll()["catch"](function(e){
     document.getElementById("root").insertAdjacentHTML("afterbegin",
       '<div class="wrap"><div class="notice bad">讀取資料失敗，請確認 Apps Script 已部署為「所有人」可存取。</div></div>');});
-  if(AUTH.key)checkKey(AUTH.key).then(function(ok){AUTH.editor=ok;if(!ok){AUTH.key="";try{localStorage.removeItem("acc.key");}catch(e){}}
-    applyRO();render();})["catch"](function(){});
+  if(AUTH.token)checkToken(AUTH.token).then(function(r){
+    if(r&&r.editor)setAuth({user:r.user,role:r.role});else setAuth(null);})["catch"](function(){});
   setInterval(poll,15000);
   document.addEventListener("visibilitychange",function(){if(!document.hidden)poll();});
 })();
