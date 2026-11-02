@@ -55,7 +55,7 @@ a{color:var(--blue-d)}
 .ro #root input:not([type=search]),.ro #root textarea,.ro #root select,.ro #root .chk{pointer-events:none}
 .ro #root textarea,.ro #root input.inline{background:transparent;border-color:var(--rule-2)}
 .ro #root .upl,.ro #root [data-act=up-link],.ro #root [data-act=fdel],.ro #root [data-act=pj-add],.ro #root [data-act=pj-del],.ro #root [data-act=it-add],.ro #root [data-act=it-del],.ro #root [data-act=mn-add],.ro #root [data-act=mn-del],.ro #root [data-act=carry],.ro #root [data-act=imp],.ro #root [data-act=tpl-apply]{display:none!important}
-.ro #root .card .formrow:has(#np-name){display:none}
+.ro #root .card:has(#np-name){display:none}
 .robar{background:var(--yellow-soft);border-bottom:1px solid var(--rule);font-size:12.5px;color:var(--yellow-d);padding:5px 20px}
 .mn-t{flex:1 1 220px;min-width:0;font-weight:500}
 .upl{position:relative;overflow:hidden;display:inline-flex;align-items:center}
@@ -302,6 +302,51 @@ table.cmp th.sv{background:var(--yellow-soft);color:var(--yellow-d)}
   .wrap{padding:14px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* v4：狀態、切換鈕、戰情 */
+.savest{font-size:12px;padding:2px 9px;border-radius:999px;white-space:nowrap;background:var(--surface-2);color:var(--ink-3);border:1px solid var(--rule-2)}
+.savest.saving{color:var(--blue-d);border-color:var(--blue-soft);background:var(--blue-soft)}
+.savest.saved{color:var(--cyan-d);background:var(--cyan-soft);border-color:transparent}
+.savest.dirty{color:var(--yellow-d);background:var(--yellow-soft);border-color:transparent}
+.savest.error{color:#fff;background:var(--red);border-color:var(--red);cursor:pointer}
+.appver{font-size:11.5px;color:var(--ink-3);font-family:"Barlow",sans-serif}
+.chk.tg{border:1.5px solid var(--rule);border-radius:9px;padding:6px 13px 6px 10px;background:var(--surface);font-weight:500;color:var(--ink-2)}
+.chk.tg:hover{border-color:var(--blue)}
+.chk.tg.on{background:var(--cyan-soft);border-color:var(--cyan-d);color:var(--cyan-d)}
+.chk.tg.sup.on{background:var(--yellow-soft);border-color:var(--yellow-d);color:var(--yellow-d)}
+.chk.tg input{width:17px;height:17px}
+.chk.tg.sup input{accent-color:var(--yellow-d)}
+.defect textarea.need{border-color:#E9A9A4;background:#FFF6F5}
+.needhint{font-size:12px;color:var(--red);margin-top:3px}
+.file .vtag{color:var(--blue-d);border-color:var(--blue);font-weight:600}
+.file.old .vtag{color:var(--ink-3);border-color:var(--rule)}
+.file .fd{flex:none;font-size:11.5px;color:var(--ink-2);font-family:"Barlow",sans-serif}
+.file .newest{flex:none;font-size:10.5px;background:var(--cyan-soft);color:var(--cyan-d);border-radius:4px;padding:0 6px;font-weight:600}
+.st2{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;background:none;border:0;padding:0;cursor:pointer;color:var(--ink-3);white-space:nowrap}
+.st2 i{width:9px;height:9px;border-radius:50%;background:var(--rule);flex:none}
+.st2.ok{color:var(--cyan-d);font-weight:600}.st2.ok i{background:var(--cyan-d)}
+.st2.bad{color:var(--red)}.st2.bad i{background:var(--red)}
+.svm{font-size:13px;font-weight:700;color:var(--yellow-d)}.svm.no{color:var(--rule);font-weight:400}
+.dash-k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .l{font-size:12.5px;color:var(--ink-3)}
+.kpi .v{font-family:"Barlow",sans-serif;font-size:28px;font-weight:700;line-height:1.2;color:var(--ink)}
+.kpi .v.b{color:var(--blue-d)}.kpi .v.r{color:var(--red)}.kpi .v.y{color:var(--yellow-d)}
+.kpi .s{font-size:12px;color:var(--ink-3)}
+table.dt{border-collapse:collapse;width:100%;font-size:13.5px}
+table.dt th,table.dt td{padding:9px 12px;border-bottom:1px solid var(--rule-2);text-align:left;vertical-align:middle}
+table.dt th{font-size:12px;color:var(--ink-3);font-weight:600;background:var(--surface-2);white-space:nowrap}
+table.dt tr.go{cursor:pointer}table.dt tr.go:hover td{background:var(--blue-soft)}
+table.dt td.n{font-family:"Barlow",sans-serif;text-align:right;white-space:nowrap}
+.mb{display:flex;align-items:center;gap:7px;min-width:96px}
+.mb span{flex:1;height:6px;border-radius:4px;background:var(--rule-2);overflow:hidden;display:block;min-width:44px}
+.mb span i{display:block;height:100%;background:var(--blue);border-radius:4px}
+.mb.full span i{background:var(--cyan-d)}.mb.sv span i{background:var(--yellow)}
+.mb b{font-family:"Barlow",sans-serif;font-size:12.5px;font-weight:600;width:34px;text-align:right;color:var(--ink-2)}
+.mb.none b{color:var(--rule)}
+.stg{font-size:11.5px;border-radius:4px;padding:1px 8px;background:var(--blue-soft);color:var(--blue-d);white-space:nowrap}
+.legend{font-size:12px;color:var(--ink-3);display:flex;gap:14px;flex-wrap:wrap}
+@media (max-width:980px){.dash-k{grid-template-columns:repeat(2,minmax(0,1fr))}.hide-m{display:none}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -794,31 +839,42 @@ function addLink(target){
   dialog({title:"掛上檔案連結",
     message:"貼上雲端硬碟、文件或其他網址。請先確認該連結已開放給專案成員檢視。",
     fields:[{key:"url",label:"網址",placeholder:"https://…"},
-            {key:"name",label:"顯示名稱",placeholder:"留空會以「外部連結」顯示"}],
+            {key:"name",label:"顯示名稱（選填）",placeholder:"留空會自動用「項目名稱－階段」"}],
     okLabel:"掛上"
   }).then(function(v){
     if(!v)return;
     if(!v.url){toast("請貼上網址");return;}
     if(!RT.db){toast("資料庫沒有連線，請重新整理頁面");return;}
-    return api("addFileLink",[S.pid,target.t,target.id,{url:normUrl(v.url),name:v.name}])
-      .then(function(){toast("已掛上連結");});
+    var u=normUrl(v.url);
+    if(!/^https?:\/\/[^\s\/]+\.[^\s]+$/i.test(u)){toast("網址格式不正確，請確認是完整的連結（https://…）");return;}
+    var nm=v.name;
+    if(!nm){var p9=String(target.id).split("__"),it8=itemById(p9[0]);
+      nm=it8?(it8.name+"－"+(p9[1]==="once"?"資料":stageName(p9[1])+"資料")):"外部連結";}
+    var dup=filesOf(target.t+"|"+target.id).filter(function(f){return f.url===u;})[0];
+    var go=function(){return api("addFileLink",[S.pid,target.t,target.id,{url:u,name:nm}])
+      .then(function(){toast("已掛上連結（新版次）");});};
+    if(dup)return ask("這個連結已經掛過","「"+dup.name+"」已是同一個網址（"+fmtDate(dup.uploadedAt)+"）。\n仍要再新增一個版次嗎？","仍要新增").then(function(ok){if(ok)return go();});
+    return go();
   })["catch"](function(){});
 }
+function fmtDate(iso){if(!iso)return"";var d=new Date(iso);if(isNaN(d))return String(iso).slice(0,10);
+  return d.getFullYear()+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+String(d.getDate()).padStart(2,"0");}
 function fileHTML(f,i,total,key){
+  var vn=total-i;
   var ic=f.kind==="link"?'<span class="gicon lk">↗</span>':'<span class="gicon">G</span>';
-  var ver=total>1?'<span class="vtag">v'+f.ver+'</span>':"";
-  var meta=(f.kind==="link"?"連結":kb(f.size))+" · "+fmtTime(f.uploadedAt)+" · "+shortUser(f.uploadedBy);
-  return '<div class="file '+(i===0?"cur":"old")+'">'+ver+ic+
-    '<a class="fn" href="'+esc(f.url)+'" target="_blank" rel="noopener">'+esc(f.name)+'</a>'+
-    '<span class="fm">'+esc(meta)+'</span>'+
+  return '<div class="file '+(i===0?"cur":"old")+'"><span class="vtag" title="版次">v'+vn+'</span>'+ic+
+    '<a class="fn" href="'+esc(f.url)+'" target="_blank" rel="noopener" title="'+esc(f.url)+'">'+esc(f.name)+'</a>'+
+    (i===0&&total>1?'<span class="newest">最新</span>':'')+
+    '<span class="fd" title="'+esc(fmtTime(f.uploadedAt))+'">'+esc(fmtDate(f.uploadedAt))+'</span>'+
+    '<span class="fm hide-m">'+esc(shortUser(f.uploadedBy))+'</span>'+
     '<button class="btn sm danger" data-act="fdel" data-key="'+esc(key)+'" data-id="'+esc(f.id)+'" data-nm="'+esc(f.name)+'">移除</button></div>';
 }
 function filesBlock(key,label){
   var files=filesOf(key),open=S.openHist[key],show=open?files:files.slice(0,1);
   var h='<div class="files">';
-  show.forEach(function(f,i){h+=fileHTML(f,open?i:0,files.length,key);});
+  show.forEach(function(f,i){h+=fileHTML(f,i,files.length,key);});
   if(files.length>1)h+='<button class="btn sm" data-act="hist" data-key="'+esc(key)+'" style="align-self:flex-start">'+
-    (open?"收合":"歷史版本（"+files.length+"）")+'</button>';
+    (open?"收合舊版":"顯示舊版（共 "+files.length+" 版）")+'</button>';
   if(!files.length)h+='<span class="muted">'+esc(label||"尚無檔案")+'</span>';
   return h+'</div>';
 }
@@ -873,37 +929,81 @@ function sideList(owners,q){
   });
   return any?h:'<div class="side-empty">'+(S.projects.length?"沒有符合的專案":"還沒有專案")+'</div>';
 }
+function statsFor(pid){
+  var pre="p/"+pid+"/",items=[],stg={};
+  Object.keys(CACHE).forEach(function(k){
+    if(k.indexOf(pre+"items/")===0)items.push(Object.assign({id:lastSeg(k)},CACHE[k]));
+    else if(k.indexOf(pre+"stages/")===0)stg[lastSeg(k)]=CACHE[k];});
+  var proj=CACHE["projects/"+pid]||{},has=proj.hasMEP!==false;
+  var act=items.filter(function(i){return has||String(i.catName||"")!=="機電";});
+  function g(i,s){return isOnce(i)?(stg[i.id+"__once"]||onceSeed(stg,i.id)):(stg[i.id+"__"+s]||{});}
+  var nonAi=act.filter(function(i){return i.checkType!=="ai";}).length,cur=0;
+  var per=STAGES.map(function(s,si){
+    var r=0,sv=0,df=0,touched=false;
+    act.forEach(function(i){var v=g(i,s.id);
+      if(v.ready)r++;if(v.supervisor&&i.checkType!=="ai")sv++;
+      if(!v.ready&&String(v.defect||"").trim())df++;
+      if(!isOnce(i)&&(v.ready||String(v.defect||"").trim()))touched=true;});
+    if(touched)cur=si;
+    return {r:r,sv:sv,df:df,pct:act.length?r/act.length*100:0,svPct:nonAi?sv/nonAi*100:0};});
+  var gt=CACHE[pre+"config/gate"]||{},gd=(gt.collect&&gt.collect.done?1:0)+(gt.meeting&&gt.meeting.done?1:0);
+  return {total:act.length,per:per,cur:cur,gate:gd};
+}
+function mbar(pct,cls){var p=Math.round(pct||0);
+  return '<div class="mb'+(cls?" "+cls:"")+(p>=100?" full":"")+(p?"":" none")+'"><span><i style="width:'+p+'%"></i></span><b>'+p+'%</b></div>';}
 function renderProjects(){
   var n=S.projects.length,owners=ownerList();
   var names=owners.filter(function(o){return o.name!=="未指定業主單位";}).map(function(o){return o.name;});
-  var h='<div class="wrap"><div class="hero"><h1>圖文資料驗收管理</h1>'+
-    '<p>依業主單位分類。每案一份 25 項標準清單，跑初驗、初驗複驗、正驗、正驗複驗四輪，可左右對照改善情形。</p>'+
-    '<div class="stats"><div class="stat"><b class="num">'+n+'</b><span>專案總數</span></div>'+
-    '<div class="stat"><b class="num">'+names.length+'</b><span>業主單位</span></div></div></div>';
-  h+='<div class="card"><div class="card-b"><div class="formrow">'+
-    '<input class="inline" style="flex:0 1 140px" id="np-code" placeholder="專案編號">'+
-    '<input class="inline grow" id="np-name" placeholder="專案名稱，例如：興隆I社宅">'+
-    '<input class="inline" style="flex:0 1 165px" id="np-owner" list="ownerlist" placeholder="業主單位">'+
+  var h='<div class="wrap"><div class="pagehead"><h1>戰情總覽</h1>'+
+    '<p>各案目前所在階段的資料備妥與監造檢核情形。點任一列進入該案；左側可依業主單位篩選。</p></div>';
+  if(!n){
+    h+='<div class="card"><div class="empty"><b>還沒有專案</b>'+
+      (canEdit()?'<button class="btn primary" style="margin-top:10px" data-act="seed">匯入既有資料（力行、福國）</button>'
+        :'目前沒有資料，或資料庫尚未設定。')+'</div></div>';
+  }else{
+    var list=S.projects.filter(function(p){return !S.ownerFilter||ownerOf(p)===S.ownerFilter;});
+    var rows=list.map(function(p){return {p:p,s:statsFor(p.id)};});
+    var avg=0,avgSv=0,dft=0,act=0;
+    rows.forEach(function(x){var c=x.s.per[x.s.cur];avg+=c.pct;avgSv+=c.svPct;dft+=c.df;if((x.p.status||"進行中")==="進行中")act++;});
+    var k=rows.length||1;
+    h+='<div class="dash-k">'+
+      '<div class="kpi"><div class="l">專案數'+(S.ownerFilter?'（'+esc(S.ownerFilter)+'）':'')+'</div><div class="v">'+rows.length+'</div><div class="s">進行中 '+act+' 案</div></div>'+
+      '<div class="kpi"><div class="l">平均資料備妥</div><div class="v b">'+Math.round(avg/k)+'%</div><div class="s">以各案目前階段計</div></div>'+
+      '<div class="kpi"><div class="l">平均監造檢核</div><div class="v y">'+Math.round(avgSv/k)+'%</div><div class="s">AI 項目不計</div></div>'+
+      '<div class="kpi"><div class="l">待補缺失</div><div class="v'+(dft?" r":"")+'">'+dft+'</div><div class="s">目前階段未備妥且有說明</div></div></div>';
+    // 業主統計
+    if(!S.ownerFilter){
+      h+='<div class="card"><div class="card-h"><h3>業主單位統計</h3><span class="sub">'+owners.length+' 個單位</span></div><div class="card-b flush scroll"><table class="dt"><thead><tr>'+
+        '<th>業主單位</th><th>案數</th><th>平均資料備妥</th><th>平均監造檢核</th><th>待補缺失</th></tr></thead><tbody>';
+      owners.forEach(function(o){
+        var rs=rows.filter(function(x){return ownerOf(x.p)===o.name;}),m=rs.length||1,a1=0,a2=0,d1=0;
+        rs.forEach(function(x){var c=x.s.per[x.s.cur];a1+=c.pct;a2+=c.svPct;d1+=c.df;});
+        h+='<tr class="go" data-act="own" data-o="'+esc(o.name)+'"><td><b>'+esc(o.name)+'</b></td><td class="n">'+rs.length+'</td>'+
+          '<td>'+mbar(a1/m)+'</td><td>'+mbar(a2/m,"sv")+'</td><td class="n"'+(d1?' style="color:var(--red)"':'')+'>'+d1+'</td></tr>';});
+      h+='</tbody></table></div></div>';}
+    // 各案
+    h+='<div class="card"><div class="card-h"><h3>各案進度</h3><span class="sub">資料備妥％（各輪）</span>'+
+      (S.ownerFilter?'<button class="btn sm" style="margin-left:auto" data-act="own" data-o="">顯示全部業主</button>':'')+
+      '</div><div class="card-b flush scroll"><table class="dt"><thead><tr><th>專案</th><th class="hide-m">業主單位</th><th>目前階段</th>'+
+      STAGES.map(function(s){return '<th>'+s.name+'</th>';}).join("")+'<th>監造（目前）</th><th>缺失</th><th class="hide-m">最後更新</th></tr></thead><tbody>';
+    rows.sort(function(a,b){return String(a.p.name||"").localeCompare(String(b.p.name||""),"zh-Hant");}).forEach(function(x){
+      var c=x.s.per[x.s.cur];
+      h+='<tr class="go" data-act="pj-open" data-id="'+esc(x.p.id)+'"><td><b>'+esc(x.p.name||"未命名")+'</b><div class="muted">'+x.s.total+' 項'+(x.p.status&&x.p.status!=="進行中"?' · '+esc(x.p.status):'')+'</div></td>'+
+        '<td class="hide-m">'+esc(ownerOf(x.p))+'</td><td><span class="stg">'+STAGES[x.s.cur].name+'</span></td>'+
+        x.s.per.map(function(q){return '<td>'+mbar(q.pct)+'</td>';}).join("")+
+        '<td>'+mbar(c.svPct,"sv")+'</td><td class="n"'+(c.df?' style="color:var(--red)"':'')+'>'+c.df+'</td>'+
+        '<td class="hide-m muted">'+esc(fmtDate(x.p.updatedAt))+'</td></tr>';});
+    h+='</tbody></table></div></div>';
+  }
+  // 新增專案（編輯者）
+  h+='<div class="card"><div class="card-h"><h3>新增專案</h3><span class="sub">建立時自動套用標準 25 項清單（八大類），四輪共用</span></div><div class="card-b"><div class="formrow">'+
+    '<input class="inline" style="flex:0 1 140px" id="np-code" placeholder="專案編號（選填）">'+
+    '<input class="inline grow" id="np-name" placeholder="專案名稱（必填），例如：興隆I社宅">'+
+    '<input class="inline" style="flex:0 1 165px" id="np-owner" list="ownerlist" placeholder="業主單位（必填）">'+
     '<datalist id="ownerlist">'+names.map(function(o){return '<option value="'+esc(o)+'">';}).join("")+'</datalist>'+
     '<input class="inline" style="flex:0 1 140px" id="np-vendor" placeholder="施工廠商">'+
     '<input class="inline" style="flex:0 1 140px" id="np-sup" placeholder="專管監造單位">'+
-    '<button class="btn primary" data-act="pj-add">建立專案</button></div>'+
-    '<div class="hint">建立時會自動套用標準 25 項清單（八大類），四輪共用。</div></div></div>';
-  if(!n)return h+'<div class="card"><div class="empty"><b>還沒有專案</b>'+
-    (canEdit()?'先在上面建立第一個，或<br><button class="btn primary" style="margin-top:10px" data-act="seed">匯入既有資料（力行、福國）</button>'
-      :'目前沒有資料，或資料庫尚未設定。')+'</div></div></div>';
-  if(owners.length>1){
-    h+='<div class="chips"><button class="chip'+(S.ownerFilter?"":" on")+'" data-act="own" data-o="">全部<em>'+n+'</em></button>';
-    owners.forEach(function(o){
-      h+='<button class="chip'+(S.ownerFilter===o.name?" on":"")+'" data-act="own" data-o="'+esc(o.name)+'">'+
-        esc(o.name)+'<em>'+o.count+'</em></button>';});
-    h+='</div>';}
-  owners.filter(function(o){return !S.ownerFilter||o.name===S.ownerFilter;}).forEach(function(o){
-    var list=S.projects.filter(function(p){return ownerOf(p)===o.name;})
-      .sort(function(a,b){return String(b.updatedAt||"").localeCompare(String(a.updatedAt||""));});
-    h+='<div class="ogroup"><div class="ogroup-h"><h3>'+esc(o.name)+'</h3>'+
-      '<span class="c">'+list.length+' 案</span><span class="line"></span></div>'+
-      '<div class="plist">'+list.map(pcard).join("")+'</div></div>';});
+    '<button class="btn primary" data-act="pj-add">建立專案</button></div></div></div>';
   return h+'</div>';
 }
 
@@ -932,16 +1032,9 @@ function renderGate(){
 function renderCompare(){
   var h='<div class="pagehead"><h1>驗收對照總表</h1>'+
     '<p>一項一列，四輪並排；每輪分「資料備妥」與「監造檢核」兩欄。點狀態可跳到該輪操作，紅字是缺失說明。</p></div>';
-  h+='<div class="card"><div class="card-b"><div class="formrow" style="gap:20px">';
-  STAGES.forEach(function(s){var p=stageP(s.id),q=supP(s.id);
-    h+='<div style="flex:1 1 150px"><div class="muted">'+s.name+'</div>'+
-      '<div style="font-family:Barlow;font-size:20px;font-weight:700;color:var(--blue-d)">'+Math.round(p.pct)+'%'+
-      '<span style="font-size:13px;font-weight:600;color:var(--yellow-d);margin-left:8px">監造 '+Math.round(q.pct)+'%</span></div>'+
-      '<div class="muted">已備妥 '+p.done+'/'+p.total+'　監造 '+q.done+'/'+q.total+
-      (p.defect?'　<span style="color:var(--red)">缺失 '+p.defect+'</span>':'')+'</div></div>';});
-  h+='</div></div></div>';
+  h+='<div class="legend" style="margin:0 0 10px"><span>● 已備妥</span><span style="color:var(--red)">● 未備妥有缺失</span><span>○ 未備妥</span><span style="color:var(--yellow-d)">✓ 監造已確認</span><span>－ 不適用</span></div>';
   h+='<div class="card"><div class="card-h"><h3>項目對照</h3>'+
-    '<span class="sub">資料備妥＝驗收準備已勾選；監造檢核＝監造單位已確認（AI 項目不適用）</span>'+
+    '<span class="sub">點狀態可跳到該輪修改</span>'+
     '<span style="margin-left:auto;display:flex;gap:6px">'+
     '<button class="btn sm" data-act="col-all" data-v="0">全部展開</button>'+
     '<button class="btn sm" data-act="col-all" data-v="1">全部收合</button></span></div>'+
@@ -963,10 +1056,10 @@ function renderCompare(){
         var v=st(it.id,s.id);
         var txt=v.ready?(it.checkType==="meeting"?"已完成":"已備妥"):"未備妥";
         var df=String(v.defect||"").trim();
-        h+='<td class="st"><button class="pill '+(v.ready?"ok":"no")+'" data-go="'+s.id+'">'+txt+'</button>'+
+        h+='<td class="st"><button class="st2 '+(v.ready?"ok":(df?"bad":""))+'" data-go="'+s.id+'"><i></i>'+txt+'</button>'+
           (df?'<span class="dflag'+(v.ready?" note":"")+'">'+esc(df.length>70?df.slice(0,70)+"…":df)+'</span>':"")+'</td>';
-        h+='<td class="sv">'+(it.checkType==="ai"?'<span class="muted">不適用</span>':
-          '<button class="pill '+(v.supervisor?"sok":"no")+'" data-go="'+s.id+'">'+(v.supervisor?"已確認":"未確認")+'</button>')+'</td>';});
+        h+='<td class="sv" style="text-align:center">'+(it.checkType==="ai"?'<span class="svm no" title="AI 項目不需監造檢核">－</span>':
+          '<span class="svm'+(v.supervisor?"":" no")+'" title="'+(v.supervisor?"監造已確認":"監造未確認")+'">'+(v.supervisor?"✓":"○")+'</span>')+'</td>';});
       h+='</tr>';});});
   return h+'</tbody></table></div></div>';
 }
@@ -984,18 +1077,19 @@ function itemRow(it,sid){
     (df&&!v.ready?' <span class="tag defect">有缺失</span>':"")+
     (it.stdNote?'<div class="istd">'+esc(it.stdNote)+'</div>':"")+
     '</div><div class="checks">'+
-    CHECKS.filter(function(c){return c.f!=="supervisor"||it.checkType!=="ai";}).map(function(c){
-      var lb=(c.f==="ready"&&it.checkType==="meeting")?"已完成":c.label;
-      return '<label class="chk'+(c.f==="ready"?" final":"")+'"><input type="checkbox" data-act="chk" '+
-        'data-id="'+esc(it.id)+'" data-sid="'+sid+'" data-f="'+c.f+'"'+(v[c.f]?" checked":"")+'> '+lb+'</label>';
+    ["ready","supervisor"].filter(function(f){return f!=="supervisor"||it.checkType!=="ai";}).map(function(f){
+      var lb=f==="ready"?(it.checkType==="meeting"?"已完成":"資料已備妥"):"監造已確認";
+      return '<label class="chk tg'+(f==="supervisor"?" sup":"")+(v[f]?" on":"")+'"><input type="checkbox" data-act="chk" '+
+        'data-id="'+esc(it.id)+'" data-sid="'+sid+'" data-f="'+f+'"'+(v[f]?" checked":"")+'> '+lb+'</label>';
     }).join("")+'</div></div>';
 
   h+='<div class="defect'+(v.ready?" ok":"")+'" style="margin-top:9px">'+
-    '<textarea class="inline" data-act="defect" data-id="'+esc(it.id)+'" data-sid="'+sid+'" '+
-    'placeholder="'+(v.ready?"備註":"缺失說明（初驗寫缺失內容，複驗寫改善情形）")+'">'+esc(v.defect||"")+'</textarea></div>';
+    '<textarea class="inline'+(!v.ready&&!df?" need":"")+'" data-act="defect" data-id="'+esc(it.id)+'" data-sid="'+sid+'" '+
+    'placeholder="'+(v.ready?"備註（選填）":"缺失說明：缺什麼、要補什麼（初驗寫缺失，複驗寫改善情形）")+'">'+esc(v.defect||"")+'</textarea>'+
+    (!v.ready&&!df?'<div class="needhint">尚未備妥，請寫下缺失說明，方便廠商補正。</div>':'')+'</div>';
 
   h+='<div class="sub2">'+
-    '<div class="slot"><h5>驗收紀錄附件</h5>'+filesBlock(recKey,"尚未上傳")+
+    '<div class="slot"><h5>驗收資料附件（含版次與日期）</h5>'+filesBlock(recKey,"尚未上傳")+
       '<div class="formrow" style="margin-top:6px">'+upBtns("rec",it.id+"__"+sid,sid)+'</div></div>'+
     '<div class="slot"><h5>監造確認文件</h5>'+filesBlock(supKey,"尚未上傳")+
       '<div class="formrow" style="margin-top:6px">'+upBtns("sup",it.id+"__"+sid,sid)+'</div></div>'+
@@ -1023,7 +1117,7 @@ function itemRow(it,sid){
 function renderStage(sid){
   var p=stageP(sid),idx=STAGES.map(function(s){return s.id;}).indexOf(sid);
   var h='<div class="pagehead"><h1>'+esc(stageName(sid))+'</h1>'+
-    '<p>逐項確認資料是否備齊：資料到位就勾「驗收準備」，監造單位有確認就勾「監造檢核」。契約與 BIM 工作執行計畫書只需確認一次，四輪共用。AI 類項目屬內部程序，只需勾驗收準備並附上檢核結果連結。缺失寫在說明欄，下一輪可以帶過去對照。</p></div>';
+    '<p>逐項確認資料是否備齊：資料到位就按「資料已備妥」，監造單位有確認就按「監造已確認」。打字會自動儲存，右上角會顯示儲存狀態。契約與 BIM 工作執行計畫書只需確認一次，四輪共用。AI 類項目屬內部程序，只需確認資料並附上檢核結果連結。缺失寫在說明欄，下一輪可以帶過去對照。</p></div>';
   if(!gateReady())h+='<div class="notice">前置作業尚未全部確認。可以先操作，但請盡快補齊。</div>';
   if(p.defect)h+='<div class="notice bad">這一輪有 <b>'+p.defect+'</b> 項尚未備妥且記有缺失說明。</div>';
 
@@ -1149,10 +1243,7 @@ function renderSettings(){
 /* ---------- 頂部 ---------- */
 function renderTop(){
   var cb=document.getElementById("crumb"),hr=document.getElementById("headright"),tb=document.getElementById("topbar");
-  var rt='<span class="rt" title="頁面版本 v3">'+
-    '<span><i class="'+(RT.db?"on":"off")+'"></i>資料庫</span>'+
-    
-    '<span>v3</span></span>';
+  var rt='<span class="appver" title="網站版本">'+APP_VER+'</span>'+saveTag();
   var meTag=rt+(canEdit()
     ?'<span class="who">操作者 <b style="color:var(--ink)">'+esc(AUTH.user)+'</b><button class="btn sm" data-act="pw">改密碼</button><button class="btn sm" data-act="logout">登出</button></span>'
     :'<span class="who">唯讀檢視<button class="btn sm primary" data-act="login">登入編輯</button></span>');
@@ -1169,7 +1260,7 @@ function renderTop(){
     return '<button class="srow'+(S.view===id?" on":"")+(cls?" "+cls:"")+(total&&pct>=100?" full":"")+'" data-go="'+id+'">'+
       '<span class="sname">'+name+'</span>'+
       '<span class="strack"><i style="width:'+pct+'%"></i></span>'+
-      '<span class="scount num">'+(ready==null?('完成 '+done+' / '+total):('已備妥 '+done+' / '+total))+'</span>'+
+      '<span class="scount num">'+(ready==null?('完成 '+done+' / '+total):('備妥 '+done+'/'+total+'　監造 '+Math.round(supP(id).pct)+'%'))+'</span>'+
       '<span class="spct num">'+Math.round(pct)+'%</span></button>';
   }
   var rows=row("gate","前置作業",g.done,2,g.pct,0,"gate",null);
@@ -1177,7 +1268,7 @@ function renderTop(){
     rows+=row(s.id,s.name,sp.done,sp.total,sp.pct,sp.readyPct,"",sp.readyCount);});
   tb.innerHTML='<div class="topbar-h">'+
     '<span class="lbl">各階段資料備妥進度'+(hasMEP()?'':'　<span class="tag">不含機電 '+D().items.filter(isMEP).length+' 項</span>')+'</span>'+
-    '<span class="right">以「驗收準備」已勾選的項目計算</span></div>'+
+    '<span class="right">藍條＝資料備妥；監造％＝監造已確認（AI 項目不計）</span></div>'+
     '<div class="srows">'+rows+'</div>';
 }
 
@@ -1255,6 +1346,7 @@ document.addEventListener("click",function(ev){
   if(!b||/^(INPUT|TEXTAREA|SELECT)$/.test(b.tagName))return;
   var a=b.dataset.act;
   if(a==="login"){doLogin();return;}
+  if(a==="reload-all"){setSave("");loadAll().then(function(){toast("已重新讀取最新資料，請確認剛才的修改");})["catch"](function(){toast("仍無法連線，請檢查網路");});return;}
   if(a==="logout"){doLogout();return;}
   if(a==="pw"){doPassword();return;}
   if(a==="seed"){runSeed(b);return;}
@@ -1285,7 +1377,10 @@ document.addEventListener("click",function(ev){
 
   if(a==="pj-add"){
     var nm=document.getElementById("np-name"),name=(nm.value||"").trim();
-    if(!name){nm.focus();return;}
+    if(!name){nm.focus();toast("請填專案名稱");return;}
+    var ow=document.getElementById("np-owner");
+    if(!ow.value.trim()){ow.focus();toast("請填業主單位，戰情總覽才能分業主統計");return;}
+    if(S.projects.some(function(x){return String(x.name||"").trim()===name;})){toast("已經有同名的專案「"+name+"」");nm.focus();return;}
     api("createProject",[{name:name,code:document.getElementById("np-code").value.trim(),
       owner:document.getElementById("np-owner").value.trim(),
       vendor:document.getElementById("np-vendor").value.trim(),
@@ -1399,7 +1494,20 @@ document.addEventListener("change",function(ev){
   if(a==="gate-note"){
     var k3=el.dataset.k;D().gate[k3].note=el.value;
     api("saveGate",[S.pid,k3,{note:el.value}]).catch(function(){});return;}
+  if(a==="chk"&&!el.dataset.ok){
+    var it9=itemById(el.dataset.id),f9=el.dataset.f,want9=el.checked,sk9=effStage(el.dataset.id,el.dataset.sid);
+    var q9=null;
+    if(f9==="ready"&&want9&&it9&&it9.checkType!=="meeting"){
+      var fs9=filesOf("rec|"+el.dataset.id+"__"+sk9).length,ai9=st(el.dataset.id,el.dataset.sid).aiUrl;
+      if(!fs9&&!ai9)q9=["這一項還沒有附件","「"+it9.name+"」目前沒有掛任何檔案或連結。\n確定要標記為「資料已備妥」嗎？","仍要標記"];}
+    if(f9==="ready"&&!want9)q9=["取消「已備妥」？","「"+(it9?it9.name:"")+"」會改回未備妥，進度會跟著下降。","取消備妥"];
+    if(q9){el.checked=!want9;
+      ask(q9[0],q9[1],q9[2],!want9).then(function(ok){if(!ok)return;
+        el.checked=want9;el.dataset.ok="1";el.dispatchEvent(new Event("change",{bubbles:true}));delete el.dataset.ok;});
+      return;}
+  }
   if(a==="chk"){
+    if(isOnce(itemById(el.dataset.id)))setTimeout(function(){toast("這一項四輪共用，已同步到每一輪");},400);
     var v2=st(el.dataset.id,el.dataset.sid),f2=el.dataset.f;
     v2[f2]=el.checked;v2.updatedBy=S.user;v2.updatedAt=new Date().toISOString();
     delete S.logCache[el.dataset.id+"__"+el.dataset.sid];render();
@@ -1564,7 +1672,7 @@ function openProject(id){
 function reload(){ refresh(); return Promise.resolve(); }
 function reloadProjects(){ render(); return Promise.resolve(); }
 
-var NAV_ACTS={"pj-home":1,reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
+var NAV_ACTS={"reload-all":1,"pj-home":1,reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
 var AUTH={token:"",user:"",role:"",editor:false};
 try{AUTH.token=localStorage.getItem("acc.token")||"";}catch(e){}
 function canEdit(){return !!AUTH.editor;}
@@ -1617,6 +1725,28 @@ function doPassword(){
 }
 function checkToken(t){return apiGet("op=me&token="+encodeURIComponent(t));}
 var CACHE={},REV=-1,LIS=[],PENDING=0;
+var APP_VER="v4 · 2026/11/03";
+var SAVE={st:"",at:"",dirty:0};
+function saveTag(){
+  if(!canEdit())return '';
+  var m={saving:"儲存中…",saved:"已儲存 "+SAVE.at,error:"⚠ 未存到，點此重試",dirty:"輸入中，稍後自動儲存"};
+  var s=SAVE.dirty?"dirty":SAVE.st;
+  return '<span id="savest" class="savest '+(s||"")+'"'+(s==="error"?' data-act="reload-all"':'')+'>'+(m[s]||"自動儲存")+'</span>';}
+function setSave(s){SAVE.st=s;if(s==="saved"){var d=new Date();SAVE.at=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
+  var el=document.getElementById("savest");if(el)el.outerHTML=saveTag();}
+var typeTimers={};
+document.addEventListener("input",function(ev){
+  var el=ev.target,a=el&&el.dataset&&el.dataset.act;
+  if(!a||!canEdit()||!/^(defect|gate-note|mn-body|mn-title|aiurl)$/.test(a))return;
+  var k=a+"|"+(el.dataset.id||el.dataset.k||"")+"|"+(el.dataset.sid||"");
+  SAVE.dirty++;setSave(SAVE.st);
+  clearTimeout(typeTimers[k]);
+  typeTimers[k]=setTimeout(function(){delete typeTimers[k];SAVE.dirty=Math.max(0,SAVE.dirty-1);
+    if(document.body.contains(el))el.dispatchEvent(new Event("change",{bubbles:true}));setSave(SAVE.st);},1500);
+});
+window.addEventListener("beforeunload",function(e){
+  if(PENDING||SAVE.dirty||(RT.db&&RT.db.pending&&RT.db.pending())){e.preventDefault();e.returnValue="還有資料正在儲存，確定要離開嗎？";return e.returnValue;}
+});
 function lastSeg(p){return p.slice(p.lastIndexOf("/")+1);}
 function parentOf(p){return p.slice(0,p.lastIndexOf("/"));}
 function fire(l){
@@ -1634,10 +1764,9 @@ function loadAll(){
 function GDB(){
   var pend=[],timer=null,waiters=[];
   function flush(){
-    var ws=pend,wt=waiters;pend=[];waiters=[];timer=null;PENDING++;
-    apiPost({token:AUTH.token,writes:ws}).then(function(r){REV=r.rev;wt.forEach(function(w){w.res();});})
-      ["catch"](function(e){wt.forEach(function(w){w.rej(e);});loadAll()["catch"](function(){});})
-      .then(function(){PENDING--;});
+    var ws=pend,wt=waiters;pend=[];waiters=[];timer=null;PENDING++;setSave("saving");
+    apiPost({token:AUTH.token,writes:ws}).then(function(r){REV=r.rev;wt.forEach(function(w){w.res();});PENDING--;if(!PENDING)setSave("saved");})
+      ["catch"](function(e){PENDING--;setSave("error");wt.forEach(function(w){w.rej(e);});loadAll()["catch"](function(){});});
   }
   function queue(w){
     if(!canEdit())return Promise.reject(new Error("請先登入編輯"));
@@ -1646,6 +1775,7 @@ function GDB(){
   }
   function sub(l){LIS.push(l);fire(l);return function(){LIS=LIS.filter(function(x){return x!==l;});};}
   return {
+    pending:function(){return pend.length>0;},
     doc:function(path){return {
       set:function(b){CACHE[path]=JSON.parse(JSON.stringify(b));emit();return queue({op:"set",path:path,data:b});},
       "delete":function(){delete CACHE[path];emit();return queue({op:"delete",path:path});},
