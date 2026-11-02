@@ -230,12 +230,17 @@ textarea.inline{min-height:54px;resize:vertical;line-height:1.55;font-size:13.5p
 
 /* 對照表 */
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table.cmp{border-collapse:collapse;font-size:13px;min-width:820px;width:100%}
+table.cmp{border-collapse:collapse;font-size:13px;min-width:1180px;width:100%}
+table.cmp thead tr+tr th{top:34px}
 table.cmp th,table.cmp td{border:1px solid var(--rule-2);padding:7px 9px;vertical-align:top;text-align:left}
 table.cmp thead th{background:var(--blue-soft);color:var(--blue-d);font-weight:700;position:sticky;top:0;z-index:2;white-space:nowrap}
 table.cmp td.itm{min-width:230px;position:sticky;left:0;background:var(--surface);z-index:1}
 table.cmp tr.catrow td{background:var(--surface-2);font-weight:700;color:var(--ink)}
 table.cmp td.st{width:150px}
+table.cmp td.sv{width:84px;background:#FFFCF0}
+table.cmp th.sh{font-size:11.5px;font-weight:600}
+table.cmp th.sv{background:var(--yellow-soft);color:var(--yellow-d)}
+.pill.sok{background:var(--yellow-soft);color:var(--yellow-d);font-weight:500}
 .pill{display:inline-block;font-size:11.5px;border-radius:4px;padding:1px 7px;white-space:nowrap}
 .pill.no{background:var(--rule-2);color:var(--ink-3)}
 .pill.rdy{background:var(--blue-soft);color:var(--blue-d)}
@@ -318,7 +323,7 @@ table.cmp td.st{width:150px}
 "use strict";
 var STAGES=[{id:"first",n:"1",name:"初驗"},{id:"firstre",n:"2",name:"初驗複驗"},
             {id:"final",n:"3",name:"正驗"},{id:"finalre",n:"4",name:"正驗複驗"}];
-var CHECKS=[{f:"supervisor",label:"專管監造"},{f:"ready",label:"驗收準備"},
+var CHECKS=[{f:"supervisor",label:"監造檢核"},{f:"ready",label:"驗收準備"},
             ];
 var TYPE_LABEL={doc:"文件審查",ai:"AI檢核",site:"現場抽驗",meeting:"會議"};
 
@@ -333,7 +338,7 @@ function fmtTime(iso){if(!iso)return"";var d=new Date(iso);if(isNaN(d))return St
   return (d.getMonth()+1)+"/"+d.getDate()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
 function kb(n){n=Number(n)||0;if(!n)return"";if(n<1024)return n+" B";if(n<1048576)return (n/1024).toFixed(0)+" KB";return (n/1048576).toFixed(1)+" MB";}
 function shortUser(e){e=String(e||"");var i=e.indexOf("@");return i>0?e.slice(0,i):e;}
-function stageName(id){for(var i=0;i<STAGES.length;i++)if(STAGES[i].id===id)return STAGES[i].name;return id;}
+function stageName(id){if(id==="once")return "各輪共用";for(var i=0;i<STAGES.length;i++)if(STAGES[i].id===id)return STAGES[i].name;return id;}
 function toast(m){var o=document.querySelector(".toast");if(o)o.remove();
   var d=document.createElement("div");d.className="toast";d.textContent=m;document.body.appendChild(d);
   setTimeout(function(){if(d.parentNode)d.remove();},3600);}
@@ -403,7 +408,7 @@ function pushLog(sd,action,detail){
 }
 function stageDoc(itemId,stage){
   var k=itemId+"__"+stage;
-  if(!M.stages[k])M.stages[k]=blankStage();
+  if(!M.stages[k])M.stages[k]=stage==="once"?onceSeed(M.stages,itemId):blankStage();
   return M.stages[k];
 }
 function saveStageDoc(itemId,stage){
@@ -530,6 +535,7 @@ var SRV={
   carryDefects:function(pid,fromStage,toStage){
     var jobs=[],n=0;
     M.items.forEach(function(it){
+      if(isOnce(it))return;
       var src=M.stages[it.id+"__"+fromStage];
       if(!src)return;
       var df=String(src.defect||"").trim();
@@ -609,12 +615,34 @@ function api(fn,args){
 
 /* ---------- 資料捷徑 ---------- */
 function D(){return S.D;}
+/* 契約、BIM工作執行計畫書：前階段確認一次即可，四輪共用同一筆（stage = "once"） */
+function isOnce(it){return !!it&&(it.once===true||(it.once!==false&&String(it.catName||"")==="契約"));}
+function itemById(id){for(var i=0;i<M.items.length;i++)if(M.items[i].id===id)return M.items[i];return null;}
+function effStage(itemId,stage){return stage==="once"||isOnce(itemById(itemId))?"once":stage;}
+function onceSeed(map,itemId){
+  var b=blankStage();b.log=[];
+  STAGES.forEach(function(s){var r=map[itemId+"__"+s.id];if(!r)return;
+    if(r.ready)b.ready=true;if(r.supervisor)b.supervisor=true;
+    if(!b.defect&&String(r.defect||"").trim())b.defect=r.defect;
+    if(!b.aiUrl&&r.aiUrl)b.aiUrl=r.aiUrl;
+    if(String(r.updatedAt||"")>String(b.updatedAt||"")){b.updatedAt=r.updatedAt;b.updatedBy=r.updatedBy;}
+    b.log=b.log.concat(r.log||[]);});
+  b.log.sort(function(x,y){return String(y.ts).localeCompare(String(x.ts));});
+  if(b.log.length>40)b.log.length=40;
+  return b;}
 function st(itemId,stage){
+  stage=effStage(itemId,stage);
   var k=itemId+"__"+stage,v=D().stages[k];
-  if(!v){v={supervisor:false,ready:false,ai:false,aiUrl:"",done:false,defect:"",updatedAt:"",updatedBy:""};
+  if(!v){v=stage==="once"?onceSeed(D().stages,itemId):
+      {supervisor:false,ready:false,ai:false,aiUrl:"",done:false,defect:"",updatedAt:"",updatedBy:""};
     D().stages[k]=v;}
   return v;}
-function filesOf(key){return (D().files&&D().files[key])||[];}
+function filesOf(key){
+  var F=D().files||{},m=/^(rec|sup)\|(.+)__once$/.exec(key);
+  if(!m)return F[key]||[];
+  var all=(F[key]||[]).slice();
+  STAGES.forEach(function(s){all=all.concat(F[m[1]+"|"+m[2]+"__"+s.id]||[]);});
+  return all.sort(function(a,b){return String(b.uploadedAt||"").localeCompare(String(a.uploadedAt||""));});}
 function findItem(id){var a=D().items.filter(function(i){return i.id===id;});return a[0]||null;}
 function findMin(id){var a=D().minutes.filter(function(m){return m.id===id;});return a[0]||null;}
 function minutesOf(sid){return D().minutes.filter(function(m){return m.stage===sid;})
@@ -650,6 +678,10 @@ function stageP(sid){
   var readyCount=its.filter(function(i){return st(i.id,sid).ready;}).length;
   return {done:done,ready:ready,readyCount:readyCount,defect:defect,total:t,
     pct:t?done/t*100:0,readyPct:t?ready/t*100:0};}
+function supP(sid){
+  var its=activeItems().filter(function(i){return i.checkType!=="ai";}),d=0;
+  its.forEach(function(i){if(st(i.id,sid).supervisor)d++;});
+  return {done:d,total:its.length,pct:its.length?d/its.length*100:0};}
 function overallP(){
   var g=gateP(),d=g.done,t=g.total,r=g.done;
   STAGES.forEach(function(s){var p=stageP(s.id);d+=p.done;t+=p.total;});
@@ -899,52 +931,55 @@ function renderGate(){
 /* ---------- 對照總表 ---------- */
 function renderCompare(){
   var h='<div class="pagehead"><h1>驗收對照總表</h1>'+
-    '<p>一項一列，四輪並排。點任一格可跳到該輪操作。紅字是缺失說明。</p></div>';
-  var o=overallP();
+    '<p>一項一列，四輪並排；每輪分「資料備妥」與「監造檢核」兩欄。點狀態可跳到該輪操作，紅字是缺失說明。</p></div>';
   h+='<div class="card"><div class="card-b"><div class="formrow" style="gap:20px">';
-  STAGES.forEach(function(s){var p=stageP(s.id);
-    h+='<div style="flex:1 1 130px"><div class="muted">'+s.name+'</div>'+
-      '<div style="font-family:Barlow;font-size:20px;font-weight:700;color:var(--blue-d)">'+Math.round(p.pct)+'%</div>'+
-      '<div class="muted">已備妥 '+p.done+'/'+p.total+(p.defect?'　<span style="color:var(--red)">缺失 '+p.defect+'</span>':'')+'</div></div>';});
+  STAGES.forEach(function(s){var p=stageP(s.id),q=supP(s.id);
+    h+='<div style="flex:1 1 150px"><div class="muted">'+s.name+'</div>'+
+      '<div style="font-family:Barlow;font-size:20px;font-weight:700;color:var(--blue-d)">'+Math.round(p.pct)+'%'+
+      '<span style="font-size:13px;font-weight:600;color:var(--yellow-d);margin-left:8px">監造 '+Math.round(q.pct)+'%</span></div>'+
+      '<div class="muted">已備妥 '+p.done+'/'+p.total+'　監造 '+q.done+'/'+q.total+
+      (p.defect?'　<span style="color:var(--red)">缺失 '+p.defect+'</span>':'')+'</div></div>';});
   h+='</div></div></div>';
-
   h+='<div class="card"><div class="card-h"><h3>項目對照</h3>'+
-    '<span class="sub">已備妥＝驗收準備已勾選</span>'+
+    '<span class="sub">資料備妥＝驗收準備已勾選；監造檢核＝監造單位已確認（AI 項目不適用）</span>'+
     '<span style="margin-left:auto;display:flex;gap:6px">'+
     '<button class="btn sm" data-act="col-all" data-v="0">全部展開</button>'+
     '<button class="btn sm" data-act="col-all" data-v="1">全部收合</button></span></div>'+
-    '<div class="card-b flush scroll"><table class="cmp"><thead><tr><th>項目</th>'+
-    STAGES.map(function(s){return '<th>'+s.name+'</th>';}).join("")+'</tr></thead><tbody>';
+    '<div class="card-b flush scroll"><table class="cmp"><thead><tr><th rowspan="2">項目</th>'+
+    STAGES.map(function(s){return '<th colspan="2" style="text-align:center">'+s.name+'</th>';}).join("")+'</tr><tr>'+
+    STAGES.map(function(){return '<th class="sh">資料備妥</th><th class="sh sv">監造檢核</th>';}).join("")+
+    '</tr></thead><tbody>';
   cats().forEach(function(c){
     var cl=isCol(c.no);
-    h+='<tr class="catrow"><td colspan="'+(STAGES.length+1)+'" class="tog" data-act="cat-tog" data-no="'+esc(c.no)+'">'+
+    h+='<tr class="catrow"><td colspan="'+(STAGES.length*2+1)+'" class="tog" data-act="cat-tog" data-no="'+esc(c.no)+'">'+
       '<span class="caret">'+(cl?"▸":"▾")+'</span> '+esc(c.no)+'、'+esc(c.name)+
       '<span class="muted" style="margin-left:8px;font-weight:400">'+c.items.length+' 項</span></td></tr>';
     if(cl)return;
     c.items.forEach(function(it){
-      h+='<tr><td class="itm"><span class="sq num">'+it.seq+'.</span> '+esc(it.name)+'</td>';
+      var once=isOnce(it);
+      h+='<tr><td class="itm"><span class="sq num">'+it.seq+'.</span> '+esc(it.name)+
+        (once?'<span class="ticks" style="letter-spacing:0">一次確認・各輪共用</span>':'')+'</td>';
       STAGES.forEach(function(s){
         var v=st(it.id,s.id);
-        var cls=v.ready?"ok":"no";
         var txt=v.ready?(it.checkType==="meeting"?"已完成":"已備妥"):"未備妥";
-        var tk=[v.ready?(it.checkType==="meeting"?"完":"備"):"－"];
-        if(it.checkType!=="ai")tk.unshift(v.supervisor?"監":"－");
-        var ticks=tk.join(" ");
         var df=String(v.defect||"").trim();
-        h+='<td class="st"><button class="pill '+cls+'" data-go="'+s.id+'">'+txt+'</button>'+
-          '<span class="ticks">'+esc(ticks)+'</span>'+
-          (df?'<span class="dflag'+(v.ready?" note":"")+'">'+esc(df.length>70?df.slice(0,70)+"…":df)+'</span>':"")+'</td>';});
+        h+='<td class="st"><button class="pill '+(v.ready?"ok":"no")+'" data-go="'+s.id+'">'+txt+'</button>'+
+          (df?'<span class="dflag'+(v.ready?" note":"")+'">'+esc(df.length>70?df.slice(0,70)+"…":df)+'</span>':"")+'</td>';
+        h+='<td class="sv">'+(it.checkType==="ai"?'<span class="muted">不適用</span>':
+          '<button class="pill '+(v.supervisor?"sok":"no")+'" data-go="'+s.id+'">'+(v.supervisor?"已確認":"未確認")+'</button>')+'</td>';});
       h+='</tr>';});});
   return h+'</tbody></table></div></div>';
 }
 
 /* ---------- 階段工作頁 ---------- */
 function itemRow(it,sid){
+  var once=isOnce(it);if(once)sid="once";
   var v=st(it.id,sid),recKey="rec|"+it.id+"__"+sid,supKey="sup|"+it.id+"__"+sid;
   var df=String(v.defect||"").trim(),lo=S.openLog[it.id+"__"+sid];
   var h='<div class="irow'+(v.ready?" done":(df?" hasdefect":""))+'">'+
     '<div class="itop"><div class="iname"><span class="sq num">'+it.seq+'.</span>'+esc(it.name)+
     (it.checkType!=="doc"?' <span class="tag'+(it.checkType==="ai"?" ai":"")+'">'+esc(TYPE_LABEL[it.checkType]||"")+'</span>':"")+
+    (once?' <span class="tag blue" title="前階段確認一次即可，四輪共用">一次確認・各輪共用</span>':"")+
     (v.ready?' <span class="tag done">'+(it.checkType==="meeting"?"已完成":"已備妥")+'</span>':"")+
     (df&&!v.ready?' <span class="tag defect">有缺失</span>':"")+
     (it.stdNote?'<div class="istd">'+esc(it.stdNote)+'</div>':"")+
@@ -988,13 +1023,15 @@ function itemRow(it,sid){
 function renderStage(sid){
   var p=stageP(sid),idx=STAGES.map(function(s){return s.id;}).indexOf(sid);
   var h='<div class="pagehead"><h1>'+esc(stageName(sid))+'</h1>'+
-    '<p>逐項確認資料是否備齊：資料到位就勾「驗收準備」，專管監造有確認就勾。AI 類項目屬內部程序，只需勾驗收準備並附上檢核結果連結。缺失寫在說明欄，下一輪可以帶過去對照。</p></div>';
+    '<p>逐項確認資料是否備齊：資料到位就勾「驗收準備」，監造單位有確認就勾「監造檢核」。契約與 BIM 工作執行計畫書只需確認一次，四輪共用。AI 類項目屬內部程序，只需勾驗收準備並附上檢核結果連結。缺失寫在說明欄，下一輪可以帶過去對照。</p></div>';
   if(!gateReady())h+='<div class="notice">前置作業尚未全部確認。可以先操作，但請盡快補齊。</div>';
   if(p.defect)h+='<div class="notice bad">這一輪有 <b>'+p.defect+'</b> 項尚未備妥且記有缺失說明。</div>';
 
   h+='<div class="card"><div class="card-b"><div class="formrow" style="gap:18px">'+
     '<div><div class="muted">資料備妥</div><div style="font-family:Barlow;font-size:22px;font-weight:700;color:var(--cyan-d)">'+
       Math.round(p.pct)+'%</div><div class="muted">'+p.done+' / '+p.total+' 項</div></div>'+
+    (function(){var q=supP(sid);return '<div><div class="muted">監造檢核</div><div style="font-family:Barlow;font-size:22px;font-weight:700;color:var(--yellow-d)">'+
+      Math.round(q.pct)+'%</div><div class="muted">'+q.done+' / '+q.total+' 項（不含 AI 項目）</div></div>';})()+
     '<div style="margin-left:auto;display:flex;gap:6px;align-items:center">'+
     (idx>0?'<button class="btn sm" data-act="carry" data-sid="'+sid+'" data-from="'+STAGES[idx-1].id+'">帶入'+STAGES[idx-1].name+'缺失</button>':'')+
     '<button class="btn sm" data-act="mn" data-sid="'+sid+'">會議紀錄（'+minutesOf(sid).length+'）</button>'+
