@@ -347,6 +347,22 @@ table.dt td.n{font-family:"Barlow",sans-serif;text-align:right;white-space:nowra
 .stg{font-size:11.5px;border-radius:4px;padding:1px 8px;background:var(--blue-soft);color:var(--blue-d);white-space:nowrap}
 .legend{font-size:12px;color:var(--ink-3);display:flex;gap:14px;flex-wrap:wrap}
 @media (max-width:980px){.dash-k{grid-template-columns:repeat(2,minmax(0,1fr))}.hide-m{display:none}}
+
+/* 大類分色 */
+.cat-h{--cc:#3CA7ED;border-left:5px solid var(--cc);background:color-mix(in srgb,var(--cc) 9%,#fff);padding:11px 16px 11px 12px;font-size:14px}
+.cat-h.tog:hover{background:color-mix(in srgb,var(--cc) 16%,#fff)}
+.cat-h .cn,.cat-h .caret{color:var(--cc)}
+.cat-h .cn{font-weight:700}
+.cat-h .cb{display:flex;align-items:center;gap:9px;margin-left:auto}
+.cat-h .cb span{width:110px;height:7px;border-radius:4px;background:color-mix(in srgb,var(--cc) 18%,#fff);overflow:hidden;display:block}
+.cat-h .cb span i{display:block;height:100%;background:var(--cc);border-radius:4px}
+.cat-h .cb b{font-family:"Barlow",sans-serif;font-size:13px;font-weight:600;color:var(--ink-2);min-width:38px;text-align:right}
+.cat-h.full .cb b{color:var(--cc)}
+.cat-h .cb .ok{font-size:11.5px;font-weight:700;color:#fff;background:var(--cc);border-radius:999px;padding:0 8px}
+.cat+.cat{border-top:1px solid var(--rule)}
+table.cmp tr.catrow td{--cc:#3CA7ED;background:color-mix(in srgb,var(--cc) 9%,#fff);box-shadow:inset 5px 0 0 var(--cc)}
+table.cmp tr.catrow td .caret{color:var(--cc)}
+@media (max-width:980px){.cat-h .cb span{width:60px}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -701,6 +717,8 @@ function isMEP(i){return String(i.catName||"")==="機電";}
 function hasMEP(){return !(D()&&D().project&&D().project.hasMEP===false);}
 function applies(i){return hasMEP()||!isMEP(i);}
 function activeItems(){return D().items.filter(applies);}
+var CAT_COLORS={"一":"#3CA7ED","二":"#17909F","三":"#7A6BD8","四":"#2E9E62","五":"#E07B2E","六":"#4F6FD9","七":"#C95A8A","八":"#B8930A"};
+function catColor(no){return CAT_COLORS[no]||"#8AA6B7";}
 function cats(all){
   var out=[],seen={};
   D().items.forEach(function(i){
@@ -1044,7 +1062,7 @@ function renderCompare(){
     '</tr></thead><tbody>';
   cats().forEach(function(c){
     var cl=isCol(c.no);
-    h+='<tr class="catrow"><td colspan="'+(STAGES.length*2+1)+'" class="tog" data-act="cat-tog" data-no="'+esc(c.no)+'">'+
+    h+='<tr class="catrow"><td colspan="'+(STAGES.length*2+1)+'" class="tog" style="--cc:'+catColor(c.no)+'" data-act="cat-tog" data-no="'+esc(c.no)+'">'+
       '<span class="caret">'+(cl?"▸":"▾")+'</span> '+esc(c.no)+'、'+esc(c.name)+
       '<span class="muted" style="margin-left:8px;font-weight:400">'+c.items.length+' 項</span></td></tr>';
     if(cl)return;
@@ -1146,9 +1164,11 @@ function renderStage(sid){
     '</div><div class="card-b flush">';
   cats().forEach(function(c){
     var d=c.items.filter(function(i){return st(i.id,sid).ready;}).length,cl=isCol(c.no);
-    h+='<div class="cat"><div class="cat-h tog" data-act="cat-tog" data-no="'+esc(c.no)+'" role="button" aria-expanded="'+(!cl)+'">'+
+    var full=d===c.items.length,pc=c.items.length?d/c.items.length*100:0;
+    h+='<div class="cat"><div class="cat-h tog'+(full?" full":"")+'" style="--cc:'+catColor(c.no)+'" data-act="cat-tog" data-no="'+esc(c.no)+'" role="button" aria-expanded="'+(!cl)+'">'+
       '<span class="caret">'+(cl?"▸":"▾")+'</span><span class="cn">'+esc(c.no)+'、</span>'+esc(c.name)+
-      '<span class="c">'+(d===c.items.length?'<b class="okc">'+d+' / '+c.items.length+'</b>':d+' / '+c.items.length)+'</span></div>';
+      '<span class="cb">'+(full?'<span class="ok" style="width:auto;height:auto;background:var(--cc)">✓ 完成</span>':'<span><i style="width:'+pc+'%"></i></span>')+
+      '<b>'+d+' / '+c.items.length+'</b></span></div>';
     if(!cl)c.items.forEach(function(it){h+=itemRow(it,sid);});
     h+='</div>';});
   return h+'</div></div>';
@@ -1194,7 +1214,7 @@ function renderItemsAdmin(){
     '</span></div><div class="card-b flush">';
   if(!D().items.length)h+='<div class="empty"><b>清單是空的</b>套用標準範本，或用 CSV 匯入自訂清單。</div>';
   cats(true).forEach(function(c){
-    h+='<div class="cat"><div class="cat-h"><span class="cn">'+esc(c.no)+'、</span>'+esc(c.name)+
+    h+='<div class="cat"><div class="cat-h" style="--cc:'+catColor(c.no)+'"><span class="cn">'+esc(c.no)+'、</span>'+esc(c.name)+
       '<span class="c">'+c.items.length+' 項</span></div>';
     c.items.forEach(function(it){
       h+='<div class="irow"><div class="itop"><div class="iname">'+
@@ -1725,7 +1745,7 @@ function doPassword(){
 }
 function checkToken(t){return apiGet("op=me&token="+encodeURIComponent(t));}
 var CACHE={},REV=-1,LIS=[],PENDING=0;
-var APP_VER="v4 · 2026/11/03";
+var APP_VER="v4.1 · 2026/11/03";
 var SAVE={st:"",at:"",dirty:0};
 function saveTag(){
   if(!canEdit())return '';
