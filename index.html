@@ -658,7 +658,7 @@ var SRV={
   exportRegister:function(){ return buildRegisterCSV(); },
   getLog:function(pid,refType,refId){
     var sd=M.stages[refId];
-    return (sd&&sd.log)?sd.log.slice():[];
+    return ((sd&&sd.log)?sd.log.slice():[]).sort(function(a,b){return String(b.ts||"").localeCompare(String(a.ts||""));});
   }
 };
 
@@ -1096,7 +1096,9 @@ function renderCompare(){
   h+='<div class="legend" style="margin:0 0 10px"><span>● 已備妥</span><span style="color:var(--red)">● 未備妥有缺失</span><span>○ 未備妥</span><span style="color:var(--yellow-d)">✓ 監造已確認</span><span>－ 不適用</span></div>';
   h+='<div class="card"><div class="card-h"><h3>項目對照</h3>'+
     '<span class="sub">點狀態可跳到該輪修改</span>'+
-    '<span style="margin-left:auto;display:flex;gap:6px">'+
+    '<span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">'+
+    '<button class="btn sm primary" data-act="xl-exp" data-v="1">匯出 Excel（含資料）</button>'+
+    '<button class="btn sm" data-act="xl-exp" data-v="0">下載空白範本</button>'+
     '<button class="btn sm" data-act="col-all" data-v="0">全部展開</button>'+
     '<button class="btn sm" data-act="col-all" data-v="1">全部收合</button></span></div>'+
     '<div class="card-b flush scroll"><table class="cmp"><thead><tr><th rowspan="2">項目</th>'+
@@ -1191,6 +1193,7 @@ function renderStage(sid){
     '<div style="margin-left:auto;display:flex;gap:6px;align-items:center">'+
     (idx>0?'<button class="btn sm" data-act="carry" data-sid="'+sid+'" data-from="'+STAGES[idx-1].id+'">帶入'+STAGES[idx-1].name+'缺失</button>':'')+
     '<button class="btn sm" data-act="mn" data-sid="'+sid+'">會議紀錄（'+minutesOf(sid).length+'）</button>'+
+    '<button class="btn sm" data-act="xl-exp" data-v="1" title="匯出本案資料（與匯入同格式）">下載 Excel</button>'+
     '<button class="btn sm primary" data-act="xl-imp" data-sid="'+sid+'">匯入 Excel</button>'+
     '</div></div>'+
     '<div class="track" style="margin-top:10px"><i style="width:'+p.pct+'%"></i></div>'+
@@ -1224,30 +1227,58 @@ function renderStage(sid){
 
 /* ---------- 會議紀錄 ---------- */
 function renderMinutes(){
-  var h='<div class="pagehead"><h1>會議紀錄</h1><p>依階段分組，一天一份。與前置作業的「驗收前會議」分開計算。</p></div>';
-  STAGES.forEach(function(s){
-    var list=minutesOf(s.id);
-    h+='<div class="card"><div class="card-h"><h3>'+s.name+'</h3><span class="sub">'+list.length+' 份</span></div>'+
-      '<div class="card-b" style="border-bottom:1px solid var(--rule-2)"><div class="formrow">'+
-      '<input class="inline" type="date" style="flex:0 1 160px" id="mn-date-'+s.id+'" value="'+today()+'">'+
-      '<input class="inline grow" id="mn-title-'+s.id+'" placeholder="會議主題">'+
-      '<button class="btn primary" data-act="mn-add" data-sid="'+s.id+'">新增當日紀錄</button></div></div>'+
-      '<div class="card-b flush">';
-    if(!list.length)h+='<div class="empty"><b>還沒有紀錄</b>每個開會日建立一份。</div>';
-    list.forEach(function(m){
-      h+='<div class="irow"><div class="itop">'+
-        '<div class="iname" style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">'+
-        '<span style="font-family:Barlow;color:var(--blue-d);flex:none">'+esc(m.date)+'</span>'+
-        '<input class="inline mn-t" data-act="mn-title" data-id="'+esc(m.id)+'" '+
-        'placeholder="會議主題" value="'+esc(m.title||"")+'"></div>'+
-        '<div class="formrow">'+upBtns("min",m.id,s.id)+
-        '<button class="btn sm danger" data-act="mn-del" data-id="'+esc(m.id)+'">刪除</button></div></div>'+
-        '<textarea class="inline" style="margin-top:8px" data-act="mn-body" data-id="'+esc(m.id)+'" '+
-        'placeholder="決議事項、待辦、出席人員">'+esc(m.body)+'</textarea>'+
-        filesBlock("min|"+m.id,"尚未上傳會議紀錄")+
-        '<div class="muted" style="margin-top:6px">最後更新 '+esc(shortUser(m.updatedBy))+' '+fmtTime(m.updatedAt)+'</div></div>';});
-    h+='</div></div>';});
-  return h;
+  var f=S.mnStage||"";
+  var h='<div class="pagehead"><h1>會議紀錄</h1><p>所有階段依日期排列，最新的在最上面。可用下方按鈕只看某一輪。</p></div>';
+  h+='<div class="card"><div class="card-h"><h3>新增會議紀錄</h3></div><div class="card-b"><div class="formrow">'+
+    '<select class="inline" style="flex:0 1 140px" id="mn-stage">'+STAGES.map(function(s){
+      return '<option value="'+s.id+'"'+((f||curStageId())===s.id?" selected":"")+'>'+s.name+'</option>';}).join("")+'</select>'+
+    '<input class="inline" type="date" style="flex:0 1 160px" id="mn-date" value="'+today()+'">'+
+    '<input class="inline grow" id="mn-title" placeholder="會議主題">'+
+    '<button class="btn primary" data-act="mn-add">新增</button></div></div></div>';
+  var all=D().minutes.slice().sort(function(a,b){return String(b.date).localeCompare(String(a.date))||String(b.updatedAt||"").localeCompare(String(a.updatedAt||""));});
+  h+='<div class="chips"><button class="chip'+(f?"":" on")+'" data-act="mn-f" data-s="">全部<em>'+all.length+'</em></button>'+
+    STAGES.map(function(s){var n=all.filter(function(m){return m.stage===s.id;}).length;
+      return '<button class="chip'+(f===s.id?" on":"")+'" data-act="mn-f" data-s="'+s.id+'">'+s.name+'<em>'+n+'</em></button>';}).join("")+'</div>';
+  var list=all.filter(function(m){return !f||m.stage===f;});
+  h+='<div class="card"><div class="card-b flush">';
+  if(!list.length)h+='<div class="empty"><b>還沒有紀錄</b>每個開會日建立一份。</div>';
+  list.forEach(function(m){
+    h+='<div class="irow"><div class="itop">'+
+      '<div class="iname" style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">'+
+      '<span style="font-family:Barlow;color:var(--blue-d);flex:none;font-weight:700">'+esc(m.date)+'</span>'+
+      '<span class="stg" style="flex:none">'+esc(stageName(m.stage))+'</span>'+
+      '<input class="inline mn-t" data-act="mn-title" data-id="'+esc(m.id)+'" placeholder="會議主題" value="'+esc(m.title||"")+'"></div>'+
+      '<div class="formrow">'+upBtns("min",m.id,m.stage)+
+      '<button class="btn sm danger" data-act="mn-del" data-id="'+esc(m.id)+'">刪除</button></div></div>'+
+      '<textarea class="inline" style="margin-top:8px" data-act="mn-body" data-id="'+esc(m.id)+'" placeholder="決議事項、待辦、出席人員">'+esc(m.body)+'</textarea>'+
+      filesBlock("min|"+m.id,"尚未上傳會議紀錄")+
+      '<div class="muted" style="margin-top:6px">最後更新 '+esc(shortUser(m.updatedBy))+' '+fmtTime(m.updatedAt)+'</div></div>';});
+  return h+'</div></div>';
+}
+function curStageId(){var c=0;STAGES.forEach(function(s,i){if(activeItems(s.id).some(function(it){var v=st(it.id,s.id);return v.ready||String(v.defect||"").trim();}))c=i;});return STAGES[c].id;}
+/* ---------- 異動紀錄（最新在上） ---------- */
+function renderActivity(){
+  var rows=[],q=String(S.actQ||"").trim().toLowerCase();
+  D().items.forEach(function(it){
+    var keys=isOnce(it)?["once"].concat(STAGES.map(function(s){return s.id;})):STAGES.map(function(s){return s.id;});
+    keys.forEach(function(k){var sd=D().stages[it.id+"__"+k];if(!sd||!sd.log)return;
+      sd.log.forEach(function(l){rows.push({ts:l.ts,user:l.user,where:k==="once"?"前置作業":stageName(k),item:it.name,no:it.catNo,action:l.action,detail:l.detail});});});});
+  Object.keys(D().files||{}).forEach(function(k){(D().files[k]||[]).forEach(function(f){
+    var p2=String(f.refId).split("__"),it=itemById(p2[0]),mn=f.refType==="min"?findMin(f.refId):null;
+    rows.push({ts:f.uploadedAt,user:f.uploadedBy,where:p2[1]?(p2[1]==="once"?"前置作業":stageName(p2[1])):(mn?stageName(mn.stage):"前置作業"),
+      item:it?it.name:(mn?"會議紀錄 "+mn.date:"前置作業"),no:it?it.catNo:"",action:"掛連結",detail:f.name});});});
+  D().minutes.forEach(function(m){rows.push({ts:m.updatedAt,user:m.updatedBy,where:stageName(m.stage),item:"會議紀錄 "+m.date,no:"",action:"建立／更新",detail:m.title||""});});
+  rows=rows.filter(function(r){return r.ts;}).sort(function(a,b){return String(b.ts).localeCompare(String(a.ts));});
+  if(q)rows=rows.filter(function(r){return (r.item+r.action+r.detail+r.user+r.where).toLowerCase().indexOf(q)>=0;});
+  var h='<div class="pagehead"><h1>異動紀錄</h1><p>這個專案所有勾選、說明、連結與會議紀錄的變動，最新的在最上面。</p></div>'+
+    '<div class="formrow" style="margin-bottom:10px"><input type="search" id="act-q" class="inline" style="flex:0 1 280px" placeholder="搜尋項目、內容、人員" value="'+esc(S.actQ||"")+'"><span class="muted">共 '+rows.length+' 筆</span></div>'+
+    '<div class="card"><div class="card-b flush scroll"><table class="dt"><thead><tr><th>時間</th><th>階段</th><th>項目</th><th>動作</th><th>內容</th><th>人員</th></tr></thead><tbody>';
+  rows.slice(0,600).forEach(function(r){
+    h+='<tr><td class="num" style="white-space:nowrap">'+esc(fmtDate(r.ts))+' '+esc(fmtTime(r.ts).split(" ")[1]||"")+'</td><td style="white-space:nowrap">'+esc(r.where)+'</td>'+
+      '<td>'+(r.no?'<b style="color:'+catColor(r.no)+'">'+esc(r.no)+'</b> ':'')+esc(r.item)+'</td><td style="white-space:nowrap">'+esc(r.action)+'</td>'+
+      '<td style="font-size:12.5px;max-width:360px;word-break:break-all">'+esc(String(r.detail||"").slice(0,160))+'</td><td style="white-space:nowrap">'+esc(shortUser(r.user))+'</td></tr>';});
+  if(!rows.length)h+='<tr><td colspan="6" class="empty">沒有紀錄</td></tr>';
+  return h+'</tbody></table></div></div>';
 }
 
 /* ---------- 項目維護 ---------- */
@@ -1313,7 +1344,7 @@ function renderTop(){
   var cb=document.getElementById("crumb"),hr=document.getElementById("headright"),tb=document.getElementById("topbar");
   var rt='<span class="appver" title="網站版本">'+APP_VER+'</span>'+saveTag();
   var meTag=rt+(canEdit()
-    ?'<span class="who">操作者 <b style="color:var(--ink)">'+esc(AUTH.user)+'</b><button class="btn sm" data-act="pw">改密碼</button><button class="btn sm" data-act="logout">登出</button></span>'
+    ?'<span class="who">操作者 <b style="color:var(--ink)">'+esc(AUTH.user)+'</b>'+(AUTH.role==="admin"?'<span class="tag blue">管理者</span><button class="btn sm" data-act="users">帳號管理</button>':'')+'<button class="btn sm" data-act="pw">改密碼</button><button class="btn sm" data-act="logout">登出</button></span>'
     :'<span class="who">唯讀檢視<button class="btn sm primary" data-act="login">登入編輯</button></span>');
   if(!S.pid||!S.D){
     cb.innerHTML='<span class="cur">專案清單</span>';
@@ -1322,7 +1353,7 @@ function renderTop(){
   var p=D().project,o=overallP();
   cb.innerHTML='<button class="btn sm ghost" data-act="pj-back">← 專案清單</button>'+
     '<span class="cur">'+esc(p.name||"未命名專案")+'</span>'+(p.code?'<span class="tag blue">'+esc(p.code)+'</span>':'');
-  hr.innerHTML='<button class="btn primary" data-act="export">匯出對照表</button>'+meTag;
+  hr.innerHTML=meTag;
   var g=gateP();
   function row(id,name,done,total,pct,readyPct,cls,ready){
     return '<button class="srow'+(S.view===id?" on":"")+(cls?" "+cls:"")+(total&&pct>=100?" full":"")+'" data-go="'+id+'">'+
@@ -1375,6 +1406,8 @@ function render(){
       '<button class="step'+(S.view==="mn"?" on":"")+'" data-go="mn"><div class="step-head">'+
       '<span class="step-n">▤</span><span class="step-name">會議紀錄</span>'+
       '<span class="step-meta">'+D().minutes.length+'</span></div></button>'+
+      '<button class="step'+(S.view==="act"?" on":"")+'" data-go="act"><div class="step-head">'+
+      '<span class="step-n">⟲</span><span class="step-name">異動紀錄</span></div></button>'+
       '<h4>設定</h4>'+
       '<button class="step'+(S.view==="items"?" on":"")+'" data-go="items"><div class="step-head">'+
       '<span class="step-n">☰</span><span class="step-name">項目維護</span>'+
@@ -1385,6 +1418,7 @@ function render(){
     if(S.view==="gate")body=renderGate();
     else if(S.view==="cmp")body=renderCompare();
     else if(S.view==="mn")body=renderMinutes();
+    else if(S.view==="act")body=renderActivity();
     else if(S.view==="items")body=renderItemsAdmin();
     else if(S.view==="set")body=renderSettings();
     else body=renderStage(S.view);
@@ -1404,6 +1438,7 @@ function render(){
 
 /* ---------- 事件 ---------- */
 document.addEventListener("input",function(ev){
+  if(ev.target&&ev.target.id==="act-q"){S.actQ=ev.target.value;clearTimeout(S._aq);S._aq=setTimeout(render,250);return;}
   if(ev.target&&ev.target.id==="pj-q"){S.pq=ev.target.value;
     var l=document.querySelector(".side-list");if(l)l.innerHTML=sideList(ownerList(),String(S.pq).trim().toLowerCase());}
 });
@@ -1416,9 +1451,11 @@ document.addEventListener("click",function(ev){
   if(a==="login"){doLogin();return;}
   if(a==="dash-pick"){S.dashPid=b.dataset.id||"";render();return;}
   if(a==="xl-imp"&&canEdit()){importExcel(b.dataset.sid);return;}
+  if(a==="xl-exp"){exportExcel(b.dataset.v==="1");return;}
   if(a==="reload-all"){setSave("");loadAll().then(function(){toast("已重新讀取最新資料，請確認剛才的修改");})["catch"](function(){toast("仍無法連線，請檢查網路");});return;}
   if(a==="logout"){doLogout();return;}
   if(a==="pw"){doPassword();return;}
+  if(a==="users"){userAdmin();return;}
   if(a==="seed"){runSeed(b);return;}
   if(!canEdit()&&!NAV_ACTS[a]){ev.preventDefault();toast("請先按右上角「登入編輯」");return;}
 
@@ -1501,9 +1538,11 @@ document.addEventListener("click",function(ev){
       .then(function(ok){ if(ok) return api("deleteItem",[S.pid,it.id]); })["catch"](function(){});
     return;}
 
+  if(a==="mn-f"){S.mnStage=b.dataset.s||"";render();return;}
   if(a==="mn-add"){
-    var s3=b.dataset.sid,dt=document.getElementById("mn-date-"+s3).value||today();
-    var ti=document.getElementById("mn-title-"+s3),title=(ti.value||"").trim();
+    var s3=document.getElementById("mn-stage").value,dt=document.getElementById("mn-date").value||today();
+    var ti=document.getElementById("mn-title"),title=(ti.value||"").trim();
+    if(!title){ti.focus();toast("請填會議主題");return;}
     api("addMinute",[S.pid,s3,dt,title]).then(function(id){
       D().minutes.push({id:id,stage:s3,date:dt,title:title,body:"",
         updatedAt:new Date().toISOString(),updatedBy:S.user});
@@ -1734,7 +1773,7 @@ function watchProject(id){
       if(!m[k])m[k]=[];
       if(!v.url&&v.assetId)v.url="/_blob/"+v.assetId;
       m[k].push(v);});
-    Object.keys(m).forEach(function(k){m[k].sort(function(a,c){return (c.ver||1)-(a.ver||1);});});
+    Object.keys(m).forEach(function(k){m[k].sort(function(a,c){return String(c.uploadedAt||"").localeCompare(String(a.uploadedAt||""))||((c.ver||1)-(a.ver||1));});});
     M.files=m;refresh();},err));
 }
 function openProject(id){
@@ -1749,7 +1788,7 @@ function openProject(id){
 function reload(){ refresh(); return Promise.resolve(); }
 function reloadProjects(){ render(); return Promise.resolve(); }
 
-var NAV_ACTS={"dash-pick":1,"reload-all":1,"pj-home":1,reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
+var NAV_ACTS={"xl-exp":1,"mn-f":1,"dash-pick":1,"reload-all":1,"pj-home":1,reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
 var AUTH={token:"",user:"",role:"",editor:false};
 try{AUTH.token=localStorage.getItem("acc.token")||"";}catch(e){}
 function canEdit(){return !!AUTH.editor;}
@@ -1766,7 +1805,7 @@ function applyRO(){
 var API=String(window.API_URL||"").trim();
 function apiGet(q){return fetch(API+(API.indexOf("?")<0?"?":"&")+q+"&_="+Date.now(),{cache:"no-store"})
   .then(function(r){return r.json();});}
-var ERRS={not_editor:"登入已過期，請重新登入",bad_login:"帳號或密碼不正確",short_password:"新密碼至少 4 個字"};
+var ERRS={not_admin:"只有管理者可以管理帳號",bad_name:"帳號只能用英文、數字與 _ . @ -（2～40 字）",last_admin:"至少要保留一位管理者",self:"不能刪除自己的帳號",no_user:"找不到這個帳號",not_editor:"登入已過期，請重新登入",bad_login:"帳號或密碼不正確",short_password:"新密碼至少 4 個字"};
 function apiPost(o){return fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
   body:JSON.stringify(o)}).then(function(r){return r.json();})
   .then(function(r){if(!r||!r.ok){var e=new Error(ERRS[r&&r.error]||(r&&r.error)||"寫入失敗");
@@ -1800,9 +1839,55 @@ function doPassword(){
     return apiPost({op:"password",token:AUTH.token,old:v.o,password:v.n}).then(function(){toast("密碼已更新");});
   })["catch"](function(e){toast(e&&e.message?e.message:"更新失敗");});
 }
+function userAdmin(){
+  var bg=document.createElement("div");bg.className="modal-bg";document.body.appendChild(bg);
+  var users=null,err="";
+  function call(o){return apiPost(Object.assign({token:AUTH.token},o)).then(function(r){
+    if(!r.users)throw new Error("後端程式還沒更新，請把最新的 Code.gs 貼到 Apps Script 並重新部署（新版本）");
+    users=r.users;err="";draw();}).catch(function(e){err=e.message||String(e);draw();});}
+  function draw(){
+    var h='<div class="modal" style="max-width:640px"><h3>帳號管理</h3>'+
+      '<p>管理者可以新增帳號、重設密碼、調整權限。「編輯者」可以修改驗收資料；「管理者」另外可以管理帳號。</p>'+
+      (err?'<div class="notice bad" style="margin:0 0 10px">'+esc(err)+'</div>':'');
+    if(!users)h+=err?'':'<div class="empty">讀取中…</div>';
+    else{h+='<div style="max-height:46vh;overflow:auto;border:1px solid var(--rule);border-radius:8px"><table class="dt"><thead><tr><th>帳號</th><th>權限</th><th>建立／修改</th><th></th></tr></thead><tbody>'+
+      users.map(function(u){var self=u.user===AUTH.user;
+        return '<tr><td><b>'+esc(u.user)+'</b>'+(self?' <span class="muted">（你）</span>':'')+'</td>'+
+          '<td><select class="inline" style="padding:3px 6px" data-u="role" data-n="'+esc(u.user)+'"><option value="editor"'+(u.role!=="admin"?" selected":"")+'>編輯者</option><option value="admin"'+(u.role==="admin"?" selected":"")+'>管理者</option></select></td>'+
+          '<td class="muted" style="font-size:12px">'+esc(fmtDate(u.updatedAt||u.createdAt))+(u.by?' · '+esc(u.by):'')+'</td>'+
+          '<td style="white-space:nowrap"><button class="btn sm" data-u="reset" data-n="'+esc(u.user)+'">重設密碼</button>'+
+          (self?'':' <button class="btn sm danger" data-u="del" data-n="'+esc(u.user)+'">刪除</button>')+'</td></tr>';}).join("")+'</tbody></table></div>';
+      h+='<h4 style="margin:14px 0 6px;font-size:14px">新增帳號</h4><div class="formrow">'+
+        '<input class="inline" style="flex:1" data-u="nn" placeholder="帳號（英數字）" autocomplete="off">'+
+        '<input class="inline" style="flex:1" type="password" data-u="np" placeholder="密碼（至少 4 字）" autocomplete="new-password">'+
+        '<select class="inline" style="flex:0 1 110px" data-u="nr"><option value="editor">編輯者</option><option value="admin">管理者</option></select>'+
+        '<button class="btn primary" data-u="add">新增</button></div>';}
+    h+='<div class="modal-ft"><button class="btn" data-u="close">關閉</button></div></div>';
+    bg.innerHTML=h;
+  }
+  draw();call({op:"users"});
+  bg.addEventListener("change",function(e){var t=e.target;if(t.dataset.u!=="role")return;
+    var n=t.dataset.n,r=t.value;
+    ask("變更權限","把「"+n+"」改為"+(r==="admin"?"管理者":"編輯者")+"？","變更").then(function(ok){
+      if(ok)call({op:"setUser",name:n,role:r});else draw();});});
+  bg.addEventListener("click",function(e){var t=e.target,u=t.dataset&&t.dataset.u;
+    if(u==="close"||t===bg){bg.remove();return;}
+    if(u==="add"){var nn=bg.querySelector('[data-u="nn"]').value.trim(),np=bg.querySelector('[data-u="np"]').value,nr=bg.querySelector('[data-u="nr"]').value;
+      if(!nn||!np){toast("請輸入帳號和密碼");return;}
+      if(users&&users.some(function(x){return x.user===nn.toLowerCase();})){toast("這個帳號已經存在，要改密碼請按「重設密碼」");return;}
+      call({op:"setUser",name:nn,password:np,role:nr}).then(function(){if(!err)toast("已新增帳號 "+nn);});return;}
+    if(u==="reset"){var n=t.dataset.n,ux=(users||[]).filter(function(x){return x.user===n;})[0];
+      dialog({title:"重設「"+n+"」的密碼",message:"對方目前的登入會被登出，需要用新密碼重新登入。",
+        fields:[{key:"p",label:"新密碼（至少 4 字）",type:"password",ac:"new-password"}],okLabel:"重設"}).then(function(v){
+        if(v&&v.p)call({op:"setUser",name:n,password:v.p,role:ux?ux.role:"editor"}).then(function(){if(!err)toast("已重設密碼");});});return;}
+    if(u==="del"){var n2=t.dataset.n;
+      ask("刪除帳號","確定刪除「"+n2+"」？刪除後無法登入，但他過去的操作紀錄會保留。","刪除",true).then(function(ok){
+        if(ok)call({op:"delUser",name:n2});});}
+  });
+}
 function checkToken(t){return apiGet("op=me&token="+encodeURIComponent(t));}
 var CACHE={},REV=-1,LIS=[],PENDING=0;
-var APP_VER="v5 · 2026/11/11";
+var APP_VER="v5.1 · 2026/11/11";
 var SAVE={st:"",at:"",dirty:0};
 function saveTag(){
   if(!canEdit())return '';
@@ -1960,7 +2045,7 @@ function guessSheet(p,sheets){
   for(var i=0;i<sheets.length;i++)if(sheets[i].name.indexOf(nm)>=0)return i;
   for(var j=0;j<sheets.length;j++)if(core&&sheets[j].name.indexOf(core)>=0)return j;
   return -1;}
-function defBlock(sid,n){return (sid==="firstre"||sid==="finalre")?Math.min(1,n-1):0;}
+function defBlock(sid,n){var k=STAGES.map(function(s){return s.id;}).indexOf(sid);if(n>=4)return Math.max(0,k);return (sid==="firstre"||sid==="finalre")?Math.min(1,n-1):0;}
 function importExcel(sid){
   var inp=document.createElement("input");inp.type="file";inp.accept=".xlsx,.xls";
   inp.onchange=function(){
@@ -2021,6 +2106,36 @@ function importDialog(pw,sid,fname){
     if(x==="ok"){var pl=plan;e.target.disabled=true;e.target.textContent="寫入中…";
       applyPlan(pl,fname).then(function(n){bg.remove();toast("已從 Excel 匯入 "+n+" 項變動");render();})
         ["catch"](function(err){bg.remove();toast("匯入失敗："+(err&&err.message?err.message:err));});}});
+}
+/* ---------- 匯出 Excel（與匯入同格式：四輪各一組「項目／準備／備註」） ---------- */
+function exportExcel(withData){
+  var p=D().project;
+  loadXLSX().then(function(X){
+    var aoa=[[p.name+"－圖資驗收資料"+(withData?"（匯出 "+fmtDate(nowISO())+"）":"（空白範本）")],[]],links=[];
+    var head=[];STAGES.forEach(function(s){head.push("項目",s.name+"準備","備註");});aoa.push(head);
+    cats(true).forEach(function(c){
+      var r=[];STAGES.forEach(function(){r.push(c.no+"、"+c.name,"","");});aoa.push(r);
+      c.items.forEach(function(it){
+        var row=[];
+        STAGES.forEach(function(s,si){
+          var sk=isOnce(it)?"once":s.id,v=withData?st(it.id,sk):{},na=isMEP(it)&&!hasMEP(s.id);
+          var fs=withData?filesOf("rec|"+it.id+"__"+sk):[],u=(v.aiUrl?[v.aiUrl]:[]).concat(fs.length?[fs[0].url]:[]);
+          var note=withData?[String(v.defect||"").trim()].concat(u).filter(Boolean).join("\n"):"";
+          if(na&&withData)note=note||"本輪不含機電";
+          row.push(it.seq+". "+it.name,withData&&v.ready?"V":"",note);
+          if(withData&&u.length&&!String(v.defect||"").trim())links.push({r:aoa.length,c:si*3+2,url:u[0]});
+        });
+        aoa.push(row);});
+    });
+    aoa.push([]);aoa.push(["填寫說明：「準備」欄已備妥填 V；「備註」欄寫缺失說明，可直接貼網址（會自動變成連結）。契約、BEP 屬前置作業，四組欄位填任一組即可。"]);
+    var ws=X.utils.aoa_to_sheet(aoa);
+    links.forEach(function(l){var a=X.utils.encode_cell({r:l.r,c:l.c});if(ws[a])ws[a].l={Target:l.url};});
+    ws["!cols"]=[];STAGES.forEach(function(){ws["!cols"].push({wch:34},{wch:10},{wch:40});});
+    ws["!merges"]=[{s:{r:0,c:0},e:{r:0,c:STAGES.length*3-1}}];
+    var wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,String(p.name+"-圖資驗收準備資料").slice(0,31));
+    X.writeFile(wb,p.name+(withData?"_驗收資料_"+fmtDate(nowISO()).replace(/\//g,""):"_空白範本")+".xlsx");
+    toast(withData?"已匯出 Excel，可修改後再用「匯入 Excel」匯回":"已下載空白範本");
+  })["catch"](function(e){toast("匯出失敗："+(e&&e.message?e.message:e));});
 }
 /* ---------- 一次性待匯入資料（imports/index.json） ---------- */
 var PENDING_RUN=false,DATA_READY=Promise.resolve();

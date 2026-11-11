@@ -1,5 +1,5 @@
 /**
- * 圖文資料驗收進度管理 — Google 試算表後端（v2：帳號密碼登入）
+ * 圖文資料驗收進度管理 — Google 試算表後端（v3：帳號密碼登入＋網站帳號管理）
  *
  * 部署：部署 → 新增部署作業（或管理部署作業 → 編輯 → 新版本）→ 網頁應用程式
  *       執行身分「我」、誰可以存取「所有人」
@@ -45,6 +45,8 @@ function users_() {
   return u;
 }
 function saveUsers_(u) { props_().setProperty('USERS', JSON.stringify(u)); }
+function adminCount_(u) { return Object.keys(u).filter(function (k) { return u[k].role === 'admin'; }).length; }
+function dropTokens_(name) { var t = tokens_(); Object.keys(t).forEach(function (k) { if (t[k].u === name) delete t[k]; }); saveTokens_(t); }
 function tokens_() { var raw = props_().getProperty('TOKENS'); return raw ? JSON.parse(raw) : {}; }
 function saveTokens_(t) {
   var now = Date.now();
@@ -102,6 +104,30 @@ function doPost(e) {
     if (String(body.password || '').length < 4) return out_({ ok: false, error: 'short_password' });
     me.h = hash_(salt_() + String(body.password)); saveUsers_(us);
     return out_({ ok: true });
+  }
+  if (body.op === 'users' || body.op === 'setUser' || body.op === 'delUser') {
+    if (w.role !== 'admin') return out_({ ok: false, error: 'not_admin' });
+    var us2 = users_();
+    if (body.op === 'setUser') {
+      var nm = String(body.name || '').trim().toLowerCase(), role = body.role === 'admin' ? 'admin' : 'editor';
+      if (!/^[a-z0-9_.@-]{2,40}$/.test(nm)) return out_({ ok: false, error: 'bad_name' });
+      var ex = us2[nm];
+      if ((!ex || body.password) && String(body.password || '').length < 4) return out_({ ok: false, error: 'short_password' });
+      if (ex && ex.role === 'admin' && role !== 'admin' && adminCount_(us2) <= 1) return out_({ ok: false, error: 'last_admin' });
+      us2[nm] = { h: body.password ? hash_(salt_() + String(body.password)) : ex.h, role: role,
+        createdAt: ex && ex.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString(), by: w.user };
+      saveUsers_(us2);
+      if (body.password && ex) dropTokens_(nm);
+    } else if (body.op === 'delUser') {
+      var dn = String(body.name || '').trim().toLowerCase();
+      if (!us2[dn]) return out_({ ok: false, error: 'no_user' });
+      if (dn === w.user) return out_({ ok: false, error: 'self' });
+      if (us2[dn].role === 'admin' && adminCount_(us2) <= 1) return out_({ ok: false, error: 'last_admin' });
+      delete us2[dn]; saveUsers_(us2); dropTokens_(dn);
+    }
+    var list = Object.keys(us2).sort().map(function (k) {
+      return { user: k, role: us2[k].role || 'editor', createdAt: us2[k].createdAt || '', updatedAt: us2[k].updatedAt || '', by: us2[k].by || '' }; });
+    return out_({ ok: true, users: list });
   }
   var writes = body.writes || [];
   if (!writes.length) return out_({ ok: true, rev: rev_() });
