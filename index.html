@@ -381,6 +381,115 @@ body.locked .head,body.locked #root{display:none}
 #login .lg-btn[disabled]{opacity:.6;cursor:wait}
 #login .lg-err{min-height:20px;font-size:13px;color:var(--red);margin:10px 0 0}
 #login .lg-foot{font-size:11.5px;color:var(--ink-3);margin-top:14px;text-align:center}
+
+/* ===== v7 簡化版面 ===== */
+.head{box-shadow:none}
+.head-row{padding:10px 20px;gap:12px}
+.crumb{font-size:14px;gap:8px}
+.crumb .home{background:none;border:0;color:var(--ink-3);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:14px}
+.crumb .home:hover{background:var(--surface-2);color:var(--blue-d)}
+.crumb .sep{color:var(--rule)}
+.crumb b{font-size:15px}
+.dd{position:relative;display:inline-block}
+.ddm{display:none;position:absolute;right:0;top:calc(100% + 6px);min-width:240px;white-space:nowrap;background:#fff;border:1px solid var(--rule);border-radius:10px;
+  box-shadow:0 10px 30px rgba(18,50,70,.16);padding:6px;z-index:60}
+.dd.open .ddm{display:block}
+.ddm button,.ddm a{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 10px;border-radius:7px;font-size:13.5px;cursor:pointer;color:var(--ink)}
+.ddm button:hover{background:var(--blue-soft);color:var(--blue-d)}
+.ddm hr{border:0;border-top:1px solid var(--rule-2);margin:5px 0}
+.ddm .ft{font-size:11px;color:var(--ink-3);padding:4px 10px}
+.ubtn{display:flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--rule);border-radius:999px;padding:4px 12px 4px 5px;cursor:pointer;font-size:13px}
+.ubtn:hover{border-color:var(--blue)}
+.ubtn .av{width:24px;height:24px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font-size:11.5px;font-weight:700}
+.ubtn .rl{font-size:11px;color:var(--ink-3)}
+/* stepper */
+.topbar{padding:0 20px 12px}
+.stepper{display:flex;gap:0;overflow-x:auto}
+.stp{flex:1 1 0;min-width:150px;display:flex;align-items:center;gap:10px;background:none;border:0;padding:8px 12px;border-radius:10px;cursor:pointer;text-align:left;position:relative}
+.stp:hover{background:var(--surface-2)}
+.stp.on{background:var(--blue-soft)}
+.stp .dot{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;
+  background:#fff;border:2px solid var(--rule);color:var(--ink-3);font-family:"Barlow",sans-serif}
+.stp.on .dot{border-color:var(--blue);color:var(--blue-d)}
+.stp.done .dot{background:var(--cyan-d);border-color:var(--cyan-d);color:#fff}
+.stp .tx{flex:1;min-width:0}
+.stp .tx b{display:block;font-size:13.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+.stp .tx em{display:block;font-style:normal;font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+.stp .ln{display:block;height:4px;border-radius:3px;background:var(--rule-2);margin-top:4px;overflow:hidden}
+.stp .ln i{display:block;height:100%;background:var(--blue);border-radius:3px}
+.stp.done .ln i{background:var(--cyan-d)}
+.stp+.stp:before{content:"";position:absolute;left:-6px;top:50%;width:12px;height:2px;background:var(--rule)}
+/* main */
+.pmain{max-width:1180px;margin:0 auto;padding:18px 22px 80px}
+.side-nav{padding:6px 0;border-bottom:1px solid var(--rule-2)}
+.side-nav .sh{font-size:11.5px;font-weight:700;color:var(--ink-3);padding:8px 14px 4px}
+.navb{display:flex;align-items:center;gap:9px;width:100%;background:none;border:0;border-left:3px solid transparent;padding:7px 14px 7px 11px;cursor:pointer;font-size:13.5px;text-align:left;color:var(--ink-2)}
+.navb:hover{background:var(--surface-2)}
+.navb.on{background:var(--blue-soft);border-left-color:var(--blue);color:var(--blue-d);font-weight:600}
+.navb .ic{width:18px;text-align:center;color:var(--ink-3)}
+.navb em{margin-left:auto;font-style:normal;font-size:12px;color:var(--ink-3);font-family:"Barlow",sans-serif}
+.ph{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+.ph h1{font-size:24px;margin:0}
+.ph .st{display:flex;gap:16px;align-items:baseline;font-size:13px;color:var(--ink-2)}
+.ph .st b{font-family:"Barlow",sans-serif;font-size:22px;color:var(--blue-d)}
+.ph .st b.y{color:var(--yellow-d)}
+.ph .st span{white-space:nowrap}
+.hint{font-size:12.5px;color:var(--ink-3);margin:2px 0 14px}
+.hint a{color:var(--blue-d);cursor:pointer}
+.bigbar{height:8px;border-radius:5px;background:var(--rule-2);overflow:hidden;margin:6px 0 4px}
+.bigbar i{display:block;height:100%;background:var(--grad);border-radius:5px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--rule);border-radius:9px;padding:3px}
+.seg button{background:none;border:0;padding:5px 12px;border-radius:7px;font-size:13px;cursor:pointer;color:var(--ink-2);white-space:nowrap}
+.seg button.on{background:var(--blue);color:#fff;font-weight:600}
+.seg button em{font-style:normal;margin-left:5px;font-family:"Barlow",sans-serif;opacity:.8}
+.seg button.bad em{color:var(--red);opacity:1;font-weight:700}
+.seg button.on.bad em{color:#fff}
+.tools .sp{flex:1}
+.tools .seg{flex:none;width:auto}
+.sw{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2);cursor:pointer;user-select:none}
+.sw input{appearance:none;width:34px;height:20px;border-radius:999px;background:var(--rule);position:relative;cursor:pointer;margin:0;transition:background .2s}
+.sw input:after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw input:checked{background:var(--cyan-d)}
+.sw input:checked:after{left:16px}
+/* item card */
+.it{border-top:1px solid var(--rule-2);background:#fff}
+.it-h{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;flex-wrap:wrap}
+.it-h:hover{background:var(--surface-2)}
+.sdot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--rule)}
+.it.ok .sdot{background:var(--cyan-d)}
+.it.bad .sdot{background:var(--red)}
+.it-h .sq{font-family:"Barlow",sans-serif;color:var(--ink-3);font-size:13px}
+.it-h .nm{font-size:14.5px;font-weight:500;flex:1 1 220px;min-width:0}
+.it-h .mt{font-size:12px;color:var(--ink-3);white-space:nowrap}
+.it-h .mt.r{color:var(--red)}
+.tgs{display:flex;gap:6px;flex:none}
+.tgs .chk.tg{padding:4px 10px 4px 8px;font-size:12.5px;border-radius:8px}
+.tgs .chk.tg input{width:15px;height:15px}
+.chev{flex:none;color:var(--ink-3);font-size:12px;width:14px;text-align:center;transition:transform .15s}
+.it.open .chev{transform:rotate(180deg)}
+.it-b{padding:0 16px 14px 36px}
+.it-b textarea.inline{min-height:44px}
+.att{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}
+.att-c{flex:1 1 280px;min-width:0}
+.att-c .al{font-size:12px;color:var(--ink-3);font-weight:600;margin-bottom:5px;display:block}
+.fchips{display:flex;flex-direction:column;gap:5px}
+.fchip{display:flex;align-items:center;gap:7px;font-size:12.5px;padding:5px 8px;background:var(--surface-2);border:1px solid var(--rule-2);border-radius:8px;min-width:0}
+.fchip.old{opacity:.65}
+.fchip .v{flex:none;font-family:"Barlow",sans-serif;font-size:11px;font-weight:700;color:var(--blue-d);background:var(--blue-soft);border-radius:4px;padding:0 6px}
+.fchip.old .v{color:var(--ink-3);background:var(--rule-2)}
+.fchip a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fchip .d{flex:none;font-size:11.5px;color:var(--ink-3);font-family:"Barlow",sans-serif}
+.fchip .x{flex:none;background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:15px;line-height:1;padding:0 3px;border-radius:4px}
+.fchip .x:hover{color:var(--red);background:var(--red-soft)}
+.addl{background:none;border:1px dashed var(--rule);color:var(--blue-d);border-radius:8px;padding:4px 10px;font-size:12.5px;cursor:pointer;margin-top:5px}
+.addl:hover{border-color:var(--blue);background:var(--blue-soft)}
+.lnk{background:none;border:0;color:var(--ink-3);font-size:12px;cursor:pointer;padding:0;text-decoration:underline}
+.lnk:hover{color:var(--blue-d)}
+.it-f{display:flex;gap:12px;align-items:center;margin-top:10px;font-size:12px;color:var(--ink-3)}
+.ro #root .addl,.ro #root .fchip .x{display:none!important}
+.emptyf{padding:22px;text-align:center;color:var(--ink-3);font-size:13px}
+@media (max-width:980px){.pmain{padding:14px 14px 70px}.it-b{padding-left:16px}.stp{min-width:128px}.tools .sp{display:none}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -407,7 +516,7 @@ var CHECKS=[{f:"supervisor",label:"監造檢核"},{f:"ready",label:"驗收準備
 var TYPE_LABEL={doc:"文件審查",ai:"AI檢核",site:"現場抽驗",meeting:"會議"};
 
 var S={user:"",projects:[],sheetUrl:"",rootFolderUrl:"",
-  pid:null,D:null,view:"gate",openLog:{},openHist:{},logCache:{},ownerFilter:"",busy:0};
+  pid:null,D:null,view:"gate",openLog:{},openHist:{},openItem:{},flt:"all",logCache:{},ownerFilter:"",busy:0};
 
 /* ---------- 基礎 ---------- */
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
@@ -902,30 +1011,22 @@ function addLink(target){
 function fmtDate(iso){if(!iso)return"";var d=new Date(iso);if(isNaN(d))return String(iso).slice(0,10);
   return d.getFullYear()+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+String(d.getDate()).padStart(2,"0");}
 function fileHTML(f,i,total,key){
-  var vn=total-i;
-  var ic=f.kind==="link"?'<span class="gicon lk">↗</span>':'<span class="gicon">G</span>';
-  return '<div class="file '+(i===0?"cur":"old")+'"><span class="vtag" title="版次">v'+vn+'</span>'+ic+
-    '<a class="fn" href="'+esc(f.url)+'" target="_blank" rel="noopener" title="'+esc(f.url)+'">'+esc(f.name)+'</a>'+
-    (i===0&&total>1?'<span class="newest">最新</span>':'')+
-    '<span class="fd" title="'+esc(fmtTime(f.uploadedAt))+'">'+esc(fmtDate(f.uploadedAt))+'</span>'+
-    '<span class="fm hide-m">'+esc(shortUser(f.uploadedBy))+'</span>'+
-    '<button class="btn sm danger" data-act="fdel" data-key="'+esc(key)+'" data-id="'+esc(f.id)+'" data-nm="'+esc(f.name)+'">移除</button></div>';
+  return '<div class="fchip'+(i===0?"":" old")+'"><span class="v" title="版次">v'+(total-i)+'</span>'+
+    '<a href="'+esc(f.url)+'" target="_blank" rel="noopener" title="'+esc(f.name)+'\n'+esc(f.url)+'">'+esc(f.name)+'</a>'+
+    '<span class="d" title="'+esc(fmtTime(f.uploadedAt)+" "+shortUser(f.uploadedBy))+'">'+esc(fmtDate(f.uploadedAt))+'</span>'+
+    '<button class="x" title="移除" data-act="fdel" data-key="'+esc(key)+'" data-id="'+esc(f.id)+'" data-nm="'+esc(f.name)+'">×</button></div>';
 }
 function filesBlock(key,label){
   var files=filesOf(key),open=S.openHist[key],show=open?files:files.slice(0,1);
-  var h='<div class="files">';
+  var h='<div class="fchips">';
   show.forEach(function(f,i){h+=fileHTML(f,i,files.length,key);});
-  if(files.length>1)h+='<button class="btn sm" data-act="hist" data-key="'+esc(key)+'" style="align-self:flex-start">'+
-    (open?"收合舊版":"顯示舊版（共 "+files.length+" 版）")+'</button>';
-  if(!files.length)h+='<span class="muted">'+esc(label||"尚無檔案")+'</span>';
-  return h+'</div>';
+  if(!files.length)h+='<span class="muted" style="font-size:12.5px">'+esc(label||"尚無檔案")+'</span>';
+  h+='</div>';
+  if(files.length>1)h+='<button class="lnk" data-act="hist" data-key="'+esc(key)+'">'+(open?"收合舊版":"看舊版（共 "+files.length+" 版）")+'</button>';
+  return h;
 }
 function upBtns(t,id,stage,label){
-  var a='data-t="'+t+'" data-id="'+esc(id)+'" data-stage="'+esc(stage||"")+'"';
-  if(!RT.assets)return '<button class="btn sm gd" '+a+' data-act="up-link">掛連結</button>';
-  return '<label class="btn sm upl">'+(label||"上傳")+
-           '<input type="file" multiple data-up="1" '+a+'></label>'+
-         '<button class="btn sm gd" '+a+' data-act="up-link">掛連結</button>';
+  return '<button class="addl" data-t="'+t+'" data-id="'+esc(id)+'" data-stage="'+esc(stage||"")+'" data-act="up-link">＋ 掛連結</button>';
 }
 
 /* ---------- 專案清單 ---------- */
@@ -954,7 +1055,12 @@ function renderSide(){
       owners.map(function(o){return '<option value="'+esc(o.name)+'"'+(S.ownerFilter===o.name?" selected":"")+'>'+
         esc(o.name)+'（'+o.count+'）</option>';}).join("")+'</select>';}
   h+='<input type="search" id="pj-q" placeholder="搜尋專案" value="'+esc(S.pq||"")+'"></div>';
-  return h+'<div class="side-list">'+sideList(owners,q)+'</div>';
+  var nav="";
+  if(S.pid&&S.D){
+    var items=[["cmp","▤","對照總表",""],["mn","🗓","會議紀錄",D().minutes.length],["act","⟲","異動紀錄",""],["items","☰","項目維護",D().items.length],["set","⚙","專案設定",""]];
+    nav='<div class="side-nav"><div class="sh">'+esc(D().project.name||"")+'</div>'+items.map(function(x){
+      return '<button class="navb'+(S.view===x[0]?" on":"")+'" data-go="'+x[0]+'"><span class="ic">'+x[1]+'</span>'+x[2]+(x[3]!==""?'<em>'+x[3]+'</em>':'')+'</button>';}).join("")+'</div>';}
+  return h+nav+'<div class="side-list">'+sideList(owners,q)+'</div>';
 }
 function sideList(owners,q){
   var h="",any=false;
@@ -1083,27 +1189,26 @@ function dashDetail(x){
 
 /* ---------- 前置 ---------- */
 function gateBlock(key,title,desc){
-  var g=D().gate[key],k="gate|"+key;
-  return '<div class="card"><div class="card-h"><h3>'+esc(title)+'</h3><span class="sub">'+esc(desc)+'</span>'+
-    '<span style="margin-left:auto">'+(g.done?'<span class="tag done">已完成</span>':'<span class="tag">未完成</span>')+'</span></div>'+
-    '<div class="card-b"><label class="chk final"><input type="checkbox" data-act="gate" data-k="'+key+'"'+(g.done?" checked":"")+'> 確認完成</label>'+
-    (g.updatedAt?'<span class="muted" style="margin-left:10px">'+esc(shortUser(g.updatedBy))+' 於 '+fmtTime(g.updatedAt)+'</span>':'')+
-    '<div style="margin-top:10px"><textarea class="inline" data-act="gate-note" data-k="'+key+'" placeholder="說明、清單範圍或待補事項">'+esc(g.note)+'</textarea></div>'+
-    '<div class="formrow" style="margin-top:10px">'+upBtns("gate",key,"gate")+'</div>'+
-    filesBlock(k)+'</div></div>';
+  var g=D().gate[key],k="gate|"+key,open=S.openItem[k]!==undefined?S.openItem[k]:!g.done,nf=filesOf(k).length;
+  var h='<div class="it '+(g.done?"ok":"")+(open?" open":"")+'"><div class="it-h" data-act="it-tog" data-k="'+esc(k)+'">'+
+    '<span class="sdot"></span><span class="nm">'+esc(title)+' <span class="muted" style="font-weight:400;font-size:12.5px">'+esc(desc)+'</span></span>'+
+    (!open&&nf?'<span class="mt">📎 '+nf+'</span>':'')+
+    '<span class="tgs"><label class="chk tg'+(g.done?" on":"")+'"><input type="checkbox" data-act="gate" data-k="'+key+'"'+(g.done?" checked":"")+'> 已完成</label></span><span class="chev">▾</span></div>';
+  if(!open)return h+'</div>';
+  return h+'<div class="it-b"><textarea class="inline" data-act="gate-note" data-k="'+key+'" placeholder="說明、清單範圍或待補事項">'+esc(g.note)+'</textarea>'+
+    '<div class="att"><div class="att-c"><span class="al">附件</span>'+filesBlock(k,"尚未掛連結")+upBtns("gate",key,"gate")+'</div></div>'+
+    (g.updatedAt?'<div class="it-f">最後更新 '+esc(shortUser(g.updatedBy))+' '+fmtTime(g.updatedAt)+'</div>':'')+'</div></div>';
 }
 function renderGate(){
   var g=gateP();
-  var h='<div class="pagehead"><h1>驗收前置作業</h1><p>檔案蒐集、驗收前會議，加上契約與 BIM 工作執行計畫書，全部確認後才進入初驗。未完成不會鎖住後面的作業，但會持續提示。</p></div>';
-  h+=gateReady()?'<div class="notice ok">前置兩項皆已確認，可以開始初驗。</div>'
-    :'<div class="notice">前置作業尚有 <b>'+(g.total-g.done)+'</b> 項未確認。後續階段仍可操作，進度會照實反映。</div>';
-  h+=gateBlock("collect","驗收前檔案蒐集確認","確認應交付文件已蒐集齊全");
-  h+=gateBlock("meeting","驗收前已開會議確認","確認驗收前置會議已召開並有紀錄");
+  var h='<div class="ph"><h1>前置作業</h1><div class="st"><span><b>'+g.done+' / '+g.total+'</b> 已完成</span></div></div>'+
+    '<div class="bigbar"><i style="width:'+g.pct+'%"></i></div>'+
+    '<div class="hint">'+(gateReady()?'✓ 前置作業全部完成，可以開始初驗。':'初驗前要先完成這 '+g.total+' 項；未完成不會鎖住後面的作業。')+'</div>';
+  h+='<div class="card" style="overflow:hidden"><div class="cat-h" style="--cc:#17909F">驗收前準備</div>'+
+    gateBlock("collect","驗收前檔案蒐集確認","應交付文件已蒐集齊全")+gateBlock("meeting","驗收前會議","已召開並有紀錄")+'</div>';
   var oi=onceItems();
-  if(oi.length){
-    h+='<div class="card"><div class="card-h"><h3>契約與 BIM 工作執行計畫書</h3><span class="sub">只在前置作業確認一次，初驗之後各輪不再列出</span></div><div class="card-b flush">';
-    oi.forEach(function(it){h+=itemRow(it,"once");});
-    h+='</div></div>';}
+  if(oi.length){h+='<div class="card" style="overflow:hidden"><div class="cat-h" style="--cc:'+catColor("一")+'">契約與 BIM 工作執行計畫書<span class="muted" style="margin-left:8px;font-weight:400;font-size:12.5px">只在這裡確認一次</span></div>';
+    oi.forEach(function(it){h+=itemRow(it,"once");});h+='</div>';}
   return h;
 }
 
@@ -1149,88 +1254,68 @@ function renderCompare(){
 /* ---------- 階段工作頁 ---------- */
 function itemRow(it,sid){
   var once=isOnce(it);if(once)sid="once";
-  var v=st(it.id,sid),recKey="rec|"+it.id+"__"+sid,supKey="sup|"+it.id+"__"+sid;
-  var df=String(v.defect||"").trim(),lo=S.openLog[it.id+"__"+sid];
-  var h='<div class="irow'+(v.ready?" done":(df?" hasdefect":""))+'">'+
-    '<div class="itop"><div class="iname"><span class="sq num">'+it.seq+'.</span>'+esc(it.name)+
-    (it.checkType!=="doc"?' <span class="tag'+(it.checkType==="ai"?" ai":"")+'">'+esc(TYPE_LABEL[it.checkType]||"")+'</span>':"")+
-    (once?' <span class="tag blue" title="只在前置作業確認一次">前置作業確認一次</span>':"")+
-    (v.ready?' <span class="tag done">'+(it.checkType==="meeting"?"已完成":"已備妥")+'</span>':"")+
-    (df&&!v.ready?' <span class="tag defect">有缺失</span>':"")+
-    (it.stdNote?'<div class="istd">'+esc(it.stdNote)+'</div>':"")+
-    '</div><div class="checks">'+
-    ["ready","supervisor"].filter(function(f){return f!=="supervisor"||it.checkType!=="ai";}).map(function(f){
+  var k=it.id+"__"+sid,v=st(it.id,sid),recKey="rec|"+k,supKey="sup|"+k;
+  var df=String(v.defect||"").trim(),lo=S.openLog[k];
+  var nf=filesOf(recKey).length+filesOf(supKey).length+(v.aiUrl?1:0);
+  var open=S.openItem[k]!==undefined?S.openItem[k]:!v.ready;
+  var cls=v.ready?"ok":(df?"bad":"");
+  var h='<div class="it '+cls+(open?" open":"")+'"><div class="it-h" data-act="it-tog" data-k="'+esc(k)+'">'+
+    '<span class="sdot"></span><span class="sq">'+esc(it.seq)+'.</span><span class="nm">'+esc(it.name)+
+    (it.checkType==="ai"?' <span class="tag ai">AI檢核</span>':it.checkType==="site"?' <span class="tag">現場抽驗</span>':"")+'</span>'+
+    (!open?(df?'<span class="mt'+(v.ready?"":" r")+'" title="'+esc(df)+'">'+esc(df.length>18?df.slice(0,18)+"…":df)+'</span>':'')+
+      (nf?'<span class="mt">📎 '+nf+'</span>':''):'')+
+    '<span class="tgs">'+["ready","supervisor"].filter(function(f){return f!=="supervisor"||it.checkType!=="ai";}).map(function(f){
       var lb=f==="ready"?(it.checkType==="meeting"?"已完成":"資料已備妥"):"監造已確認";
       return '<label class="chk tg'+(f==="supervisor"?" sup":"")+(v[f]?" on":"")+'"><input type="checkbox" data-act="chk" '+
-        'data-id="'+esc(it.id)+'" data-sid="'+sid+'" data-f="'+f+'"'+(v[f]?" checked":"")+'> '+lb+'</label>';
-    }).join("")+'</div></div>';
-
-  h+='<div class="defect'+(v.ready?" ok":"")+'" style="margin-top:9px">'+
-    '<textarea class="inline'+(!v.ready&&!df?" need":"")+'" data-act="defect" data-id="'+esc(it.id)+'" data-sid="'+sid+'" '+
-    'placeholder="'+(v.ready?"備註（選填）":"缺失說明：缺什麼、要補什麼（初驗寫缺失，複驗寫改善情形）")+'">'+esc(v.defect||"")+'</textarea>'+
-    (!v.ready&&!df?'<div class="needhint">尚未備妥，請寫下缺失說明，方便廠商補正。</div>':'')+'</div>';
-
-  h+='<div class="sub2">'+
-    '<div class="slot"><h5>驗收資料附件（含版次與日期）</h5>'+filesBlock(recKey,"尚未上傳")+
-      '<div class="formrow" style="margin-top:6px">'+upBtns("rec",it.id+"__"+sid,sid)+'</div></div>'+
-    '<div class="slot"><h5>監造確認文件</h5>'+filesBlock(supKey,"尚未上傳")+
-      '<div class="formrow" style="margin-top:6px">'+upBtns("sup",it.id+"__"+sid,sid)+'</div></div>'+
-    '</div>';
-
+        'data-id="'+esc(it.id)+'" data-sid="'+sid+'" data-f="'+f+'"'+(v[f]?" checked":"")+'> '+lb+'</label>';}).join("")+'</span>'+
+    '<span class="chev">▾</span></div>';
+  if(!open)return h+'</div>';
+  h+='<div class="it-b">'+(it.stdNote?'<div class="istd" style="margin-bottom:6px">'+esc(it.stdNote)+'</div>':'')+
+    '<div class="defect'+(v.ready?" ok":"")+'"><textarea class="inline'+(!v.ready&&!df?" need":"")+'" data-act="defect" data-id="'+esc(it.id)+'" data-sid="'+sid+'" '+
+    'placeholder="'+(v.ready?"備註（選填）":"缺失說明：缺什麼、要補什麼")+'">'+esc(v.defect||"")+'</textarea>'+
+    (!v.ready&&!df?'<div class="needhint">尚未備妥，請寫下缺失說明。</div>':'')+'</div>';
   if(it.checkType==="ai"){
     h+='<div class="formrow" style="margin-top:8px"><span class="muted" style="flex:0 0 78px">AI 檢核連結</span>'+
-      '<input class="inline" data-act="aiurl" data-id="'+esc(it.id)+'" data-sid="'+sid+'" '+
-      'placeholder="https://…" value="'+esc(v.aiUrl||"")+'">'+
-      (v.aiUrl?'<a class="glink" href="'+esc(v.aiUrl)+'" target="_blank" rel="noopener">開啟</a>':"")+'</div>';
-  }
-
-  if(lo){
-    var rec=S.logCache[it.id+"__"+sid];
-    h+='<div class="log">'+(rec?(rec.map(function(l){
-      return fmtTime(l.ts)+" "+esc(shortUser(l.user))+"："+esc(l.action)+(l.detail?"（"+esc(l.detail)+"）":"");
-    }).join("<br>")||"（沒有紀錄）"):"讀取中…")+'</div>';}
-
-  h+='<div class="formrow" style="margin-top:8px">'+
-    '<button class="btn sm" data-act="log" data-id="'+esc(it.id)+'" data-sid="'+sid+'">'+(lo?"收合歷程":"歷程")+'</button>'+
-    (v.updatedAt?'<span class="muted">最後更新 '+esc(shortUser(v.updatedBy))+' '+fmtTime(v.updatedAt)+'</span>':"")+
-    '</div>';
-  return h+'</div>';
+      '<input class="inline" data-act="aiurl" data-id="'+esc(it.id)+'" data-sid="'+sid+'" placeholder="https://…" value="'+esc(v.aiUrl||"")+'">'+
+      (v.aiUrl?'<a class="glink" href="'+esc(v.aiUrl)+'" target="_blank" rel="noopener">開啟</a>':"")+'</div>';}
+  h+='<div class="att"><div class="att-c"><span class="al">資料附件</span>'+filesBlock(recKey,"尚未掛連結")+upBtns("rec",k,sid)+'</div>'+
+    (it.checkType!=="ai"?'<div class="att-c"><span class="al">監造確認文件</span>'+filesBlock(supKey,"尚未掛連結")+upBtns("sup",k,sid)+'</div>':'')+'</div>';
+  if(lo){var rec=S.logCache[k];
+    h+='<div class="log">'+(rec?(rec.map(function(l){return fmtTime(l.ts)+" "+esc(shortUser(l.user))+"："+esc(l.action)+(l.detail?"（"+esc(l.detail)+"）":"");}).join("<br>")||"（沒有紀錄）"):"讀取中…")+'</div>';}
+  h+='<div class="it-f">'+(v.updatedAt?'<span>最後更新 '+esc(shortUser(v.updatedBy))+' '+fmtTime(v.updatedAt)+'</span>':'')+
+    '<button class="lnk" data-act="log" data-id="'+esc(it.id)+'" data-sid="'+sid+'">'+(lo?"收合歷程":"看歷程")+'</button></div>';
+  return h+'</div></div>';
 }
 function renderStage(sid){
-  var p=stageP(sid),idx=STAGES.map(function(s){return s.id;}).indexOf(sid);
-  var h='<div class="pagehead"><h1>'+esc(stageName(sid))+'</h1>'+
-    '<p>逐項確認資料是否備齊：資料到位就按「資料已備妥」，監造單位有確認就按「監造已確認」。打字會自動儲存，右上角會顯示儲存狀態。契約與 BIM 工作執行計畫書已移到「前置作業」確認一次。可用右側「匯入 Excel」批次更新本輪。AI 類項目屬內部程序，只需確認資料並附上檢核結果連結。缺失寫在說明欄，下一輪可以帶過去對照。</p></div>';
-  if(!gateReady())h+='<div class="notice">前置作業尚未全部確認。可以先操作，但請盡快補齊。</div>';
-  if(p.defect)h+='<div class="notice bad">這一輪有 <b>'+p.defect+'</b> 項尚未備妥且記有缺失說明。</div>';
-
-  h+='<div class="card"><div class="card-b"><div class="formrow" style="gap:18px">'+
-    '<div><div class="muted">資料備妥</div><div style="font-family:Barlow;font-size:22px;font-weight:700;color:var(--cyan-d)">'+
-      Math.round(p.pct)+'%</div><div class="muted">'+p.done+' / '+p.total+' 項</div></div>'+
-    (function(){var q=supP(sid);return '<div><div class="muted">監造檢核</div><div style="font-family:Barlow;font-size:22px;font-weight:700;color:var(--yellow-d)">'+
-      Math.round(q.pct)+'%</div><div class="muted">'+q.done+' / '+q.total+' 項（不含 AI 項目）</div></div>';})()+
-    '<div style="margin-left:auto;display:flex;gap:6px;align-items:center">'+
-    (idx>0?'<button class="btn sm" data-act="carry" data-sid="'+sid+'" data-from="'+STAGES[idx-1].id+'">帶入'+STAGES[idx-1].name+'缺失</button>':'')+
-    '<button class="btn sm" data-act="mn" data-sid="'+sid+'">會議紀錄（'+minutesOf(sid).length+'）</button>'+
-    '<button class="btn sm" data-act="xl-exp" data-v="1" title="匯出本案資料（與匯入同格式）">下載 Excel</button>'+
-    '<button class="btn sm primary" data-act="xl-imp" data-sid="'+sid+'">匯入 Excel</button>'+
-    '</div></div>'+
-    '<div class="track" style="margin-top:10px"><i style="width:'+p.pct+'%"></i></div>'+
-    (D().items.some(isMEP)?'<div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
-      '<label class="chk tg'+(hasMEP(sid)?" on":"")+'"><input type="checkbox" data-act="mep-stage" data-sid="'+sid+'"'+(hasMEP(sid)?" checked":"")+'> 本輪包含機電驗收</label>'+
-      '<span class="muted">'+(hasMEP(sid)?'「七、機電」列入本輪進度':'本輪不含機電：「七、機電」不列出、不計入進度')+'</span></div>':'')+
-    '</div></div>';
-
+  var p=stageP(sid),q=supP(sid),idx=STAGES.map(function(s){return s.id;}).indexOf(sid),f=S.flt||"all";
+  var its=activeItems(sid),nTodo=0,nBad=0,nOk=0;
+  its.forEach(function(i){var v=st(i.id,sid);if(v.ready)nOk++;else{nTodo++;if(String(v.defect||"").trim())nBad++;}});
+  var h='<div class="ph"><h1>'+esc(stageName(sid))+'</h1><div class="st">'+
+    '<span><b>'+Math.round(p.pct)+'%</b> 資料備妥 '+p.done+'/'+p.total+'</span>'+
+    '<span><b class="y">'+Math.round(q.pct)+'%</b> 監造檢核 '+q.done+'/'+q.total+'</span></div></div>'+
+    '<div class="bigbar"><i style="width:'+p.pct+'%"></i></div>'+
+    '<div class="hint">點項目可展開填寫；按「資料已備妥」「監造已確認」即完成，打字會自動儲存。'+
+    (!gateReady()?'　<a data-go="gate">⚠ 前置作業尚未完成</a>':'')+'</div>';
+  h+='<div class="tools"><div class="seg">'+
+    [["all","全部",its.length],["todo","待處理",nTodo],["bad","有缺失",nBad],["ok","已備妥",nOk]].map(function(x){
+      return '<button class="'+(f===x[0]?"on":"")+(x[0]==="bad"&&x[2]?" bad":"")+'" data-act="flt" data-f="'+x[0]+'">'+x[1]+'<em>'+x[2]+'</em></button>';}).join("")+'</div>'+
+    (D().items.some(isMEP)?'<label class="sw" title="本輪是否辦理機電驗收"><input type="checkbox" data-act="mep-stage" data-sid="'+sid+'"'+(hasMEP(sid)?" checked":"")+'>本輪含機電</label>':'')+
+    '<span class="sp"></span>'+
+    '<button class="btn primary" data-act="xl-imp" data-sid="'+sid+'">⇪ 匯入 Excel</button>'+
+    '<div class="dd"><button class="btn" data-act="dd">更多 ▾</button><div class="ddm">'+
+      '<button data-act="xl-exp" data-v="1">⇩　下載 Excel（本案資料）</button>'+
+      '<button data-act="xl-exp" data-v="0">⇩　下載空白範本</button>'+
+      (idx>0?'<button data-act="carry" data-sid="'+sid+'" data-from="'+STAGES[idx-1].id+'">↧　帶入'+STAGES[idx-1].name+'缺失</button>':'')+
+      '<button data-act="mn">🗓　會議紀錄（'+minutesOf(sid).length+'）</button><hr>'+
+      '<button data-act="col-all" data-v="0">展開全部大類</button><button data-act="col-all" data-v="1">收合全部大類</button>'+
+      '<button data-act="it-all" data-v="1">展開全部項目</button><button data-act="it-all" data-v="0">收合全部項目</button>'+
+    '</div></div></div>';
   if(!D().items.length){
     h+='<div class="card"><div class="empty"><b>這個專案還沒有項目</b>'+
       '<button class="btn primary" data-act="tpl-apply" style="margin-top:8px">套用標準 25 項範本</button></div></div>';
     return h;}
 
-  h+='<div class="card"><div class="card-h"><h3>驗收項目</h3>'+
-    '<span class="sub">'+activeItems(sid).length+' 項</span>'+
-    '<span style="margin-left:auto;display:flex;gap:6px">'+
-    '<button class="btn sm" data-act="col-all" data-v="0">全部展開</button>'+
-    '<button class="btn sm" data-act="col-all" data-v="1">全部收合</button></span>'+
-    '</div><div class="card-b flush">';
+  h+='<div class="card" style="overflow:hidden">';var shown=0;
   cats(false,sid).forEach(function(c){
     var d=c.items.filter(function(i){return st(i.id,sid).ready;}).length,cl=isCol(c.no);
     var full=d===c.items.length,pc=c.items.length?d/c.items.length*100:0;
@@ -1238,9 +1323,11 @@ function renderStage(sid){
       '<span class="caret">'+(cl?"▸":"▾")+'</span><span class="cn">'+esc(c.no)+'、</span>'+esc(c.name)+
       '<span class="cb">'+(full?'<span class="ok" style="width:auto;height:auto;background:var(--cc)">✓ 完成</span>':'<span><i style="width:'+pc+'%"></i></span>')+
       '<b>'+d+' / '+c.items.length+'</b></span></div>';
-    if(!cl)c.items.forEach(function(it){h+=itemRow(it,sid);});
+    if(!cl)c.items.forEach(function(it){var v=st(it.id,sid),bad=!v.ready&&String(v.defect||"").trim();
+      if(f==="todo"&&v.ready)return;if(f==="bad"&&!bad)return;if(f==="ok"&&!v.ready)return;shown++;h+=itemRow(it,sid);});
     h+='</div>';});
-  return h+'</div></div>';
+  if(f!=="all"&&!shown)h+='<div class="emptyf">這個篩選條件下沒有項目 🎉</div>';
+  return h+'</div>';
 }
 
 /* ---------- 會議紀錄 ---------- */
@@ -1360,33 +1447,21 @@ function renderSettings(){
 /* ---------- 頂部 ---------- */
 function renderTop(){
   var cb=document.getElementById("crumb"),hr=document.getElementById("headright"),tb=document.getElementById("topbar");
-  var rt='<span class="appver" title="網站版本">'+APP_VER+'</span>'+saveTag();
-  var meTag=rt+(canEdit()
-    ?'<span class="who">操作者 <b style="color:var(--ink)">'+esc(AUTH.user)+'</b>'+(AUTH.role==="admin"?'<span class="tag blue">管理者</span><button class="btn sm" data-act="users">帳號管理</button>':'')+'<button class="btn sm" data-act="pw">改密碼</button><button class="btn sm" data-act="logout">登出</button></span>'
-    :'<span class="who">'+esc(AUTH.user)+' <span class="tag">檢視者</span><button class="btn sm" data-act="pw">改密碼</button><button class="btn sm" data-act="logout">登出</button></span>');
-  if(!S.pid||!S.D){
-    cb.innerHTML='<span class="cur">專案清單</span>';
-    hr.innerHTML=meTag;
-    tb.innerHTML="";return;}
-  var p=D().project,o=overallP();
-  cb.innerHTML='<button class="btn sm ghost" data-act="pj-back">← 專案清單</button>'+
-    '<span class="cur">'+esc(p.name||"未命名專案")+'</span>'+(p.code?'<span class="tag blue">'+esc(p.code)+'</span>':'');
-  hr.innerHTML=meTag;
-  var g=gateP();
-  function row(id,name,done,total,pct,readyPct,cls,ready){
-    return '<button class="srow'+(S.view===id?" on":"")+(cls?" "+cls:"")+(total&&pct>=100?" full":"")+'" data-go="'+id+'">'+
-      '<span class="sname">'+name+'</span>'+
-      '<span class="strack"><i style="width:'+pct+'%"></i></span>'+
-      '<span class="scount num">'+(ready==null?('完成 '+done+' / '+total):('備妥 '+done+'/'+total+'　監造 '+Math.round(supP(id).pct)+'%'))+'</span>'+
-      '<span class="spct num">'+Math.round(pct)+'%</span></button>';
-  }
-  var rows=row("gate","前置作業",g.done,g.total,g.pct,0,"gate",null);
-  STAGES.forEach(function(s){var sp=stageP(s.id);
-    rows+=row(s.id,s.name,sp.done,sp.total,sp.pct,sp.readyPct,"",sp.readyCount);});
-  tb.innerHTML='<div class="topbar-h">'+
-    '<span class="lbl">各階段資料備妥進度'+(hasMEP("*")?'':'　<span class="tag">不含機電</span>')+'</span>'+
-    '<span class="right">藍條＝資料備妥；監造％＝監造已確認（AI 項目不計）</span></div>'+
-    '<div class="srows">'+rows+'</div>';
+  var rn={admin:"管理者",editor:"編輯者",viewer:"檢視者"}[AUTH.role]||"";
+  hr.innerHTML=saveTag()+'<div class="dd"><button class="ubtn" data-act="dd"><span class="av">'+esc(String(AUTH.user||"?").slice(0,1).toUpperCase())+'</span>'+
+    esc(AUTH.user||"")+' <span class="rl">'+rn+'</span> ▾</button><div class="ddm">'+
+    (AUTH.role==="admin"?'<button data-act="users">👥　帳號管理</button>':'')+
+    '<button data-act="pw">🔑　修改密碼</button><hr><button data-act="logout">↩　登出</button><div class="ft">'+APP_VER+'</div></div></div>';
+  if(!S.pid||!S.D){cb.innerHTML='<b>戰情總覽</b>';tb.innerHTML="";return;}
+  var p=D().project;
+  cb.innerHTML='<button class="home" data-act="pj-back">戰情總覽</button><span class="sep">›</span><b>'+esc(p.name||"未命名專案")+'</b>';
+  var g=gateP(),steps=[{id:"gate",n:"前",name:"前置作業",pct:g.pct,txt:g.done+" / "+g.total+" 完成"}];
+  STAGES.forEach(function(s){var sp=stageP(s.id),q=supP(s.id);
+    steps.push({id:s.id,n:s.n,name:s.name,pct:sp.pct,txt:Math.round(sp.pct)+"%　監造 "+Math.round(q.pct)+"%"});});
+  tb.innerHTML='<div class="stepper">'+steps.map(function(s){
+    var done=s.pct>=100;
+    return '<button class="stp'+(S.view===s.id?" on":"")+(done?" done":"")+'" data-go="'+s.id+'"><span class="dot">'+(done?"✓":s.n)+'</span>'+
+      '<span class="tx"><b>'+s.name+'</b><em>'+s.txt+'</em><span class="ln"><i style="width:'+s.pct+'%"></i></span></span></button>';}).join("")+'</div>';
 }
 
 /* ---------- 主渲染 ---------- */
@@ -1409,29 +1484,6 @@ function render(){
   var side='<aside class="side">'+renderSide()+'</aside>';
   if(!S.pid||!S.D){root.innerHTML='<div class="app">'+side+'<div class="app-main">'+renderProjects()+'</div></div>';}
   else{
-    var g=gateP(),rail='<h4>驗收流程</h4>';
-    rail+='<button class="step'+(S.view==="gate"?" on":"")+'" data-go="gate"><div class="step-head">'+
-      '<span class="step-n">前</span><span class="step-name">前置作業</span><span class="step-meta">'+g.done+'/'+g.total+'</span></div>'+
-      '<div class="bar"><i class="'+(g.pct?(g.pct>=100?"full":""):"zero")+'" style="width:'+g.pct+'%"></i></div></button>';
-    STAGES.forEach(function(s){var p=stageP(s.id);
-      rail+='<button class="step'+(S.view===s.id?" on":"")+'" data-go="'+s.id+'"><div class="step-head">'+
-        '<span class="step-n num">'+s.n+'</span><span class="step-name">'+s.name+'</span>'+
-        '<span class="step-meta">'+p.done+'/'+p.total+'</span></div>'+
-        '<div class="bar"><i class="'+(p.pct?(p.pct>=100?"full":""):"zero")+'" style="width:'+p.pct+'%"></i></div></button>';});
-    rail+='<h4>檢視</h4>'+
-      '<button class="step'+(S.view==="cmp"?" on":"")+'" data-go="cmp"><div class="step-head">'+
-      '<span class="step-n">▤</span><span class="step-name">對照總表</span></div></button>'+
-      '<button class="step'+(S.view==="mn"?" on":"")+'" data-go="mn"><div class="step-head">'+
-      '<span class="step-n">▤</span><span class="step-name">會議紀錄</span>'+
-      '<span class="step-meta">'+D().minutes.length+'</span></div></button>'+
-      '<button class="step'+(S.view==="act"?" on":"")+'" data-go="act"><div class="step-head">'+
-      '<span class="step-n">⟲</span><span class="step-name">異動紀錄</span></div></button>'+
-      '<h4>設定</h4>'+
-      '<button class="step'+(S.view==="items"?" on":"")+'" data-go="items"><div class="step-head">'+
-      '<span class="step-n">☰</span><span class="step-name">項目維護</span>'+
-      '<span class="step-meta">'+D().items.length+'</span></div></button>'+
-      '<button class="step'+(S.view==="set"?" on":"")+'" data-go="set"><div class="step-head">'+
-      '<span class="step-n">⚙</span><span class="step-name">專案設定</span></div></button>';
     var body;
     if(S.view==="gate")body=renderGate();
     else if(S.view==="cmp")body=renderCompare();
@@ -1440,7 +1492,7 @@ function render(){
     else if(S.view==="items")body=renderItemsAdmin();
     else if(S.view==="set")body=renderSettings();
     else body=renderStage(S.view);
-    root.innerHTML='<div class="app">'+side+'<div class="app-main"><div class="shell"><nav class="rail">'+rail+'</nav><main>'+body+'</main></div></div></div>';
+    root.innerHTML='<div class="app">'+side+'<div class="app-main"><main class="pmain">'+body+'</main></div></div>';
   }
   if(akey){
     var all=document.querySelectorAll("[data-act],input[id],textarea[id],select[id]"),el=null;
@@ -1461,12 +1513,19 @@ document.addEventListener("input",function(ev){
     var l=document.querySelector(".side-list");if(l)l.innerHTML=sideList(ownerList(),String(S.pq).trim().toLowerCase());}
 });
 document.addEventListener("click",function(ev){
-  var t=ev.target,go=t.closest("[data-go]");
+  var t=ev.target;
+  var ddb=t.closest('[data-act="dd"]');
+  document.querySelectorAll(".dd.open").forEach(function(d){if(!ddb||d!==ddb.parentNode)d.classList.remove("open");});
+  if(ddb){ddb.parentNode.classList.toggle("open");return;}
+  var go=t.closest("[data-go]");
   if(go){S.view=go.dataset.go;render();window.scrollTo(0,0);return;}
   var b=t.closest("[data-act]");
   if(!b||/^(INPUT|TEXTAREA|SELECT)$/.test(b.tagName))return;
   var a=b.dataset.act;
   if(a==="login"){doLogin();return;}
+  if(a==="it-tog"){if(t.closest(".tgs"))return;var k5=b.dataset.k,cur5=b.parentNode.classList.contains("open");S.openItem[k5]=!cur5;render();return;}
+  if(a==="flt"){S.flt=b.dataset.f;render();return;}
+  if(a==="it-all"){var o6=b.dataset.v==="1";D().items.forEach(function(it){S.openItem[it.id+"__"+(isOnce(it)?"once":S.view)]=o6;});render();return;}
   if(a==="dash-pick"){S.dashPid=b.dataset.id||"";render();return;}
   if(a==="xl-imp"&&canEdit()){importExcel(b.dataset.sid);return;}
   if(a==="xl-exp"){exportExcel(b.dataset.v==="1");return;}
@@ -1806,7 +1865,7 @@ function openProject(id){
 function reload(){ refresh(); return Promise.resolve(); }
 function reloadProjects(){ render(); return Promise.resolve(); }
 
-var NAV_ACTS={"xl-exp":1,"mn-f":1,"dash-pick":1,"reload-all":1,"pj-home":1,reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
+var NAV_ACTS={"it-tog":1,flt:1,"it-all":1,dd:1,"xl-exp":1,"mn-f":1,"dash-pick":1,"reload-all":1,"pj-home":1,reload:1,"cat-tog":1,"col-all":1,own:1,hist:1,log:1,mn:1,"pj-open":1,"pj-back":1,export:1,"tpl-dl":1};
 var AUTH={token:"",user:"",role:"",editor:false};
 try{AUTH.token=localStorage.getItem("acc.token")||"";}catch(e){}
 function canEdit(){return !!AUTH.editor;}
@@ -1905,7 +1964,7 @@ function userAdmin(){
 }
 function checkToken(t){return apiGet("op=me&token="+encodeURIComponent(t));}
 var CACHE={},REV=-1,LIS=[],PENDING=0;
-var APP_VER="v6 · 2026/11/11";
+var APP_VER="v7 · 2026/11/11";
 var SAVE={st:"",at:"",dirty:0};
 function saveTag(){
   if(!canEdit())return '';
