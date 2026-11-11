@@ -1,5 +1,5 @@
 /**
- * 圖文資料驗收進度管理 — Google 試算表後端（v3：帳號密碼登入＋網站帳號管理）
+ * 圖文資料驗收進度管理 — Google 試算表後端（v4：須登入才能讀取；管理者／編輯者／檢視者）
  *
  * 部署：部署 → 新增部署作業（或管理部署作業 → 編輯 → 新版本）→ 網頁應用程式
  *       執行身分「我」、誰可以存取「所有人」
@@ -81,9 +81,11 @@ function readAll_() {
   return docs;
 }
 function doGet(e) {
-  var p = (e && e.parameter) || {}, op = p.op || 'all';
+  var p = (e && e.parameter) || {}, op = p.op || 'all', w = who_(p.token);
+  if (op === 'ping') return out_({ ok: true });
+  if (op === 'me') return out_({ ok: true, login: !!w, editor: !!w && w.role !== 'viewer', user: w ? w.user : '', role: w ? w.role : '' });
+  if (!w) return out_({ ok: false, error: 'not_login' });   // 未登入不提供任何資料
   if (op === 'rev') return out_({ ok: true, rev: rev_() });
-  if (op === 'me') { var w = who_(p.token); return out_({ ok: true, editor: !!w, user: w ? w.user : '', role: w ? w.role : '' }); }
   return out_({ ok: true, rev: rev_(), docs: readAll_() });
 }
 
@@ -109,7 +111,7 @@ function doPost(e) {
     if (w.role !== 'admin') return out_({ ok: false, error: 'not_admin' });
     var us2 = users_();
     if (body.op === 'setUser') {
-      var nm = String(body.name || '').trim().toLowerCase(), role = body.role === 'admin' ? 'admin' : 'editor';
+      var nm = String(body.name || '').trim().toLowerCase(), role = (body.role === 'admin' || body.role === 'viewer') ? body.role : 'editor';
       if (!/^[a-z0-9_.@-]{2,40}$/.test(nm)) return out_({ ok: false, error: 'bad_name' });
       var ex = us2[nm];
       if ((!ex || body.password) && String(body.password || '').length < 4) return out_({ ok: false, error: 'short_password' });
@@ -130,6 +132,7 @@ function doPost(e) {
     return out_({ ok: true, users: list });
   }
   var writes = body.writes || [];
+  if (w.role === 'viewer') return out_({ ok: false, error: 'viewer' });
   if (!writes.length) return out_({ ok: true, rev: rev_() });
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -174,8 +177,10 @@ function menuSetUser() {
   if (b.getSelectedButton() !== ui.Button.OK) return;
   var pw = b.getResponseText();
   if (pw.length < 4) { ui.alert('密碼至少 4 個字'); return; }
-  var c = ui.alert('權限', '要設為管理者嗎？（否＝一般編輯者）', ui.ButtonSet.YES_NO);
-  var u = users_(); u[name] = { h: hash_(salt_() + pw), role: c === ui.Button.YES ? 'admin' : 'editor' };
+  var c = ui.prompt('權限', '輸入 1＝管理者、2＝編輯者、3＝檢視者（只能看）', ui.ButtonSet.OK_CANCEL);
+  if (c.getSelectedButton() !== ui.Button.OK) return;
+  var rl = { '1': 'admin', '2': 'editor', '3': 'viewer' }[c.getResponseText().trim()] || 'editor';
+  var u = users_(); u[name] = { h: hash_(salt_() + pw), role: rl, createdAt: new Date().toISOString(), by: 'sheet' };
   saveUsers_(u); ui.alert('已儲存帳號「' + name + '」');
 }
 function menuDelUser() {
@@ -193,6 +198,6 @@ function menuDelUser() {
 function menuListUsers() {
   var u = users_();
   SpreadsheetApp.getUi().alert('目前帳號', Object.keys(u).map(function (k) {
-    return k + '（' + (u[k].role === 'admin' ? '管理者' : '編輯者') + '）'; }).join('\n'), SpreadsheetApp.getUi().ButtonSet.OK);
+    return k + '（' + ({ admin: '管理者', editor: '編輯者', viewer: '檢視者' }[u[k].role] || '編輯者') + '）'; }).join('\n'), SpreadsheetApp.getUi().ButtonSet.OK);
 }
 function menuBump() { bump_(); SpreadsheetApp.getUi().alert('已通知網站重新讀取資料'); }

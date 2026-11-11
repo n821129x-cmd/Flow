@@ -363,10 +363,28 @@ table.dt td.n{font-family:"Barlow",sans-serif;text-align:right;white-space:nowra
 table.cmp tr.catrow td{--cc:#3CA7ED;background:color-mix(in srgb,var(--cc) 9%,#fff);box-shadow:inset 5px 0 0 var(--cc)}
 table.cmp tr.catrow td .caret{color:var(--cc)}
 @media (max-width:980px){.cat-h .cb span{width:60px}}
+
+/* 登入畫面 */
+body.locked .head,body.locked #root{display:none}
+#login{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:linear-gradient(135deg,#E4F3FD 0%,#E0F8FB 55%,#FFF6D6 100%)}
+#login .lg-card{width:100%;max-width:380px;background:#fff;border-radius:16px;box-shadow:0 16px 48px rgba(18,50,70,.16);padding:30px 28px 24px}
+#login .lg-mark{width:48px;height:48px;border-radius:13px;background:var(--grad);color:#fff;display:grid;place-items:center;font-weight:700;font-size:20px;margin-bottom:14px}
+#login h1{font-size:21px;margin:0 0 4px}
+#login .lg-sub{font-size:13px;color:var(--ink-3);margin:0 0 20px}
+#login label{display:block;margin-bottom:12px}
+#login label span{display:block;font-size:12.5px;color:var(--ink-2);margin-bottom:5px;font-weight:500}
+#login input{width:100%;padding:10px 12px;border:1.5px solid var(--rule);border-radius:9px;font-size:15px;background:var(--surface-2)}
+#login input:focus{border-color:var(--blue);outline:none;background:#fff}
+#login .lg-btn{width:100%;padding:11px;border:0;border-radius:9px;background:var(--blue);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px}
+#login .lg-btn:hover{background:var(--blue-d)}
+#login .lg-btn[disabled]{opacity:.6;cursor:wait}
+#login .lg-err{min-height:20px;font-size:13px;color:var(--red);margin:10px 0 0}
+#login .lg-foot{font-size:11.5px;color:var(--ink-3);margin-top:14px;text-align:center}
 </style>
 <script src="config.js"></script>
 </head>
-<body>
+<body class="locked">
 
 <div class="head">
   <div class="head-row">
@@ -1345,7 +1363,7 @@ function renderTop(){
   var rt='<span class="appver" title="網站版本">'+APP_VER+'</span>'+saveTag();
   var meTag=rt+(canEdit()
     ?'<span class="who">操作者 <b style="color:var(--ink)">'+esc(AUTH.user)+'</b>'+(AUTH.role==="admin"?'<span class="tag blue">管理者</span><button class="btn sm" data-act="users">帳號管理</button>':'')+'<button class="btn sm" data-act="pw">改密碼</button><button class="btn sm" data-act="logout">登出</button></span>'
-    :'<span class="who">唯讀檢視<button class="btn sm primary" data-act="login">登入編輯</button></span>');
+    :'<span class="who">'+esc(AUTH.user)+' <span class="tag">檢視者</span><button class="btn sm" data-act="pw">改密碼</button><button class="btn sm" data-act="logout">登出</button></span>');
   if(!S.pid||!S.D){
     cb.innerHTML='<span class="cur">專案清單</span>';
     hr.innerHTML=meTag;
@@ -1795,23 +1813,23 @@ function canEdit(){return !!AUTH.editor;}
 function applyRO(){
   document.body.classList.toggle("ro",!canEdit());
   var bar=document.getElementById("robar");
-  if(!canEdit()){
+  if(!canEdit()&&AUTH.user){
     if(!bar){bar=document.createElement("div");bar.id="robar";bar.className="robar";
       var hd=document.querySelector(".head");hd.insertBefore(bar,hd.children[1]);}
-    bar.textContent="目前為唯讀檢視。需要修改請按右上角「登入編輯」，輸入帳號密碼。";
+    bar.textContent="檢視者帳號：可以瀏覽所有資料，但無法修改。需要編輯權限請洽管理者。";
   }else if(bar)bar.remove();
 }
 /* ---------- Google 試算表後端（Apps Script 網頁應用程式） ---------- */
 var API=String(window.API_URL||"").trim();
-function apiGet(q){return fetch(API+(API.indexOf("?")<0?"?":"&")+q+"&_="+Date.now(),{cache:"no-store"})
-  .then(function(r){return r.json();});}
-var ERRS={not_admin:"只有管理者可以管理帳號",bad_name:"帳號只能用英文、數字與 _ . @ -（2～40 字）",last_admin:"至少要保留一位管理者",self:"不能刪除自己的帳號",no_user:"找不到這個帳號",not_editor:"登入已過期，請重新登入",bad_login:"帳號或密碼不正確",short_password:"新密碼至少 4 個字"};
+function apiGet(q){return fetch(API+(API.indexOf("?")<0?"?":"&")+q+(AUTH.token&&q.indexOf("token=")<0?"&token="+encodeURIComponent(AUTH.token):"")+"&_="+Date.now(),{cache:"no-store"})
+  .then(function(r){return r.json();}).then(function(r){if(r&&r.error==="not_login"&&AUTH.token){sessionEnded();}return r;});}
+var ERRS={viewer:"檢視者帳號只能瀏覽，無法修改資料",not_login:"請先登入",not_admin:"只有管理者可以管理帳號",bad_name:"帳號只能用英文、數字與 _ . @ -（2～40 字）",last_admin:"至少要保留一位管理者",self:"不能刪除自己的帳號",no_user:"找不到這個帳號",not_editor:"登入已過期，請重新登入",bad_login:"帳號或密碼不正確",short_password:"新密碼至少 4 個字"};
 function apiPost(o){return fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
   body:JSON.stringify(o)}).then(function(r){return r.json();})
   .then(function(r){if(!r||!r.ok){var e=new Error(ERRS[r&&r.error]||(r&&r.error)||"寫入失敗");
     if(r&&r.error==="not_editor"&&o.token){setAuth(null);}throw e;}return r;});}
 function setAuth(r){
-  if(r){AUTH.token=r.token||AUTH.token;AUTH.user=r.user;AUTH.role=r.role;AUTH.editor=true;S.user=r.user;}
+  if(r){AUTH.token=r.token||AUTH.token;AUTH.user=r.user;AUTH.role=r.role||"editor";AUTH.editor=AUTH.role!=="viewer";S.user=r.user;}
   else{AUTH.token="";AUTH.user="";AUTH.role="";AUTH.editor=false;S.user="";}
   try{if(AUTH.token)localStorage.setItem("acc.token",AUTH.token);else localStorage.removeItem("acc.token");}catch(e){}
   applyRO();render();
@@ -1826,7 +1844,7 @@ function doLogin(){
   })["catch"](function(e){toast(e&&e.message?e.message:"無法連線後端");});
 }
 function doLogout(){
-  var t=AUTH.token;setAuth(null);
+  var t=AUTH.token;setAuth(null);CACHE={};M.projects=[];S.projects=[];dropSubs();S.pid=null;S.D=null;showLogin("已登出");
   if(t)apiPost({op:"logout",token:t})["catch"](function(){});
 }
 function doPassword(){
@@ -1847,20 +1865,20 @@ function userAdmin(){
     users=r.users;err="";draw();}).catch(function(e){err=e.message||String(e);draw();});}
   function draw(){
     var h='<div class="modal" style="max-width:640px"><h3>帳號管理</h3>'+
-      '<p>管理者可以新增帳號、重設密碼、調整權限。「編輯者」可以修改驗收資料；「管理者」另外可以管理帳號。</p>'+
+      '<p>沒有帳號的人看不到任何資料。「檢視者」只能瀏覽；「編輯者」可以修改驗收資料；「管理者」另外可以管理帳號。</p>'+
       (err?'<div class="notice bad" style="margin:0 0 10px">'+esc(err)+'</div>':'');
     if(!users)h+=err?'':'<div class="empty">讀取中…</div>';
     else{h+='<div style="max-height:46vh;overflow:auto;border:1px solid var(--rule);border-radius:8px"><table class="dt"><thead><tr><th>帳號</th><th>權限</th><th>建立／修改</th><th></th></tr></thead><tbody>'+
       users.map(function(u){var self=u.user===AUTH.user;
         return '<tr><td><b>'+esc(u.user)+'</b>'+(self?' <span class="muted">（你）</span>':'')+'</td>'+
-          '<td><select class="inline" style="padding:3px 6px" data-u="role" data-n="'+esc(u.user)+'"><option value="editor"'+(u.role!=="admin"?" selected":"")+'>編輯者</option><option value="admin"'+(u.role==="admin"?" selected":"")+'>管理者</option></select></td>'+
+          '<td><select class="inline" style="padding:3px 6px" data-u="role" data-n="'+esc(u.user)+'">'+[["viewer","檢視者"],["editor","編輯者"],["admin","管理者"]].map(function(o){return '<option value="'+o[0]+'"'+((u.role||"editor")===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select></td>'+
           '<td class="muted" style="font-size:12px">'+esc(fmtDate(u.updatedAt||u.createdAt))+(u.by?' · '+esc(u.by):'')+'</td>'+
           '<td style="white-space:nowrap"><button class="btn sm" data-u="reset" data-n="'+esc(u.user)+'">重設密碼</button>'+
           (self?'':' <button class="btn sm danger" data-u="del" data-n="'+esc(u.user)+'">刪除</button>')+'</td></tr>';}).join("")+'</tbody></table></div>';
       h+='<h4 style="margin:14px 0 6px;font-size:14px">新增帳號</h4><div class="formrow">'+
         '<input class="inline" style="flex:1" data-u="nn" placeholder="帳號（英數字）" autocomplete="off">'+
         '<input class="inline" style="flex:1" type="password" data-u="np" placeholder="密碼（至少 4 字）" autocomplete="new-password">'+
-        '<select class="inline" style="flex:0 1 110px" data-u="nr"><option value="editor">編輯者</option><option value="admin">管理者</option></select>'+
+        '<select class="inline" style="flex:0 1 110px" data-u="nr"><option value="editor">編輯者</option><option value="viewer">檢視者</option><option value="admin">管理者</option></select>'+
         '<button class="btn primary" data-u="add">新增</button></div>';}
     h+='<div class="modal-ft"><button class="btn" data-u="close">關閉</button></div></div>';
     bg.innerHTML=h;
@@ -1868,7 +1886,7 @@ function userAdmin(){
   draw();call({op:"users"});
   bg.addEventListener("change",function(e){var t=e.target;if(t.dataset.u!=="role")return;
     var n=t.dataset.n,r=t.value;
-    ask("變更權限","把「"+n+"」改為"+(r==="admin"?"管理者":"編輯者")+"？","變更").then(function(ok){
+    ask("變更權限","把「"+n+"」改為"+({admin:"管理者",editor:"編輯者",viewer:"檢視者"}[r])+"？","變更").then(function(ok){
       if(ok)call({op:"setUser",name:n,role:r});else draw();});});
   bg.addEventListener("click",function(e){var t=e.target,u=t.dataset&&t.dataset.u;
     if(u==="close"||t===bg){bg.remove();return;}
@@ -1887,7 +1905,7 @@ function userAdmin(){
 }
 function checkToken(t){return apiGet("op=me&token="+encodeURIComponent(t));}
 var CACHE={},REV=-1,LIS=[],PENDING=0;
-var APP_VER="v5.1 · 2026/11/11";
+var APP_VER="v6 · 2026/11/11";
 var SAVE={st:"",at:"",dirty:0};
 function saveTag(){
   if(!canEdit())return '';
@@ -2176,26 +2194,66 @@ function runOneImport(id){
   });
 }
 
-(function boot(){
-  applyRO();render();
-  if(!API){
-    document.getElementById("root").innerHTML=
-      '<div class="wrap"><div class="notice bad">尚未設定後端網址（config.js 的 API_URL），目前無法讀取資料。</div></div>';
-    return;
-  }
-  RT.db=GDB();RT.assets=null;RT.downloads=null;
-  RT.db.collection("projects").onSnapshot(function(sn){
-    M.projects=sn.docs.map(function(x){var v=thaw(x);v.id=x.id;return v;});
-    S.projects=SRV.bootstrap().projects;
-    refresh();
+var STARTED=false;
+function showLogin(msg){
+  document.body.classList.add("locked");
+  var el=document.getElementById("login");
+  if(!el){el=document.createElement("div");el.id="login";document.body.appendChild(el);}
+  el.innerHTML='<form class="lg-card" autocomplete="on"><div class="lg-mark">驗</div>'+
+    '<h1>圖文資料驗收進度管理</h1><p class="lg-sub">臺北市社會住宅圖文資料驗收　請登入後使用</p>'+
+    '<label><span>帳號</span><input name="username" id="lg-u" autocomplete="username" required></label>'+
+    '<label><span>密碼</span><input name="password" id="lg-p" type="password" autocomplete="current-password" required></label>'+
+    '<button class="lg-btn" type="submit">登入</button><div class="lg-err" id="lg-err">'+esc(msg||"")+'</div>'+
+    '<div class="lg-foot">沒有帳號或忘記密碼，請洽系統管理者。<br>'+APP_VER+'</div></form>';
+  var f=el.querySelector("form");
+  setTimeout(function(){var u=document.getElementById("lg-u");if(u)u.focus();},30);
+  f.addEventListener("submit",function(e){e.preventDefault();
+    var u=document.getElementById("lg-u").value.trim(),pw=document.getElementById("lg-p").value,btn=f.querySelector(".lg-btn"),er=document.getElementById("lg-err");
+    if(!u||!pw){er.textContent="請輸入帳號與密碼";return;}
+    if(!API){er.textContent="尚未設定後端網址（config.js）";return;}
+    btn.disabled=true;btn.textContent="登入中…";er.textContent="";
+    apiPost({op:"login",user:u,password:pw}).then(function(r){
+      setAuth(r);hideLogin();startData();
+    })["catch"](function(e2){btn.disabled=false;btn.textContent="登入";
+      er.textContent=(e2&&e2.message&&e2.message!=="Failed to fetch")?e2.message:"無法連線後端，請稍後再試";
+      document.getElementById("lg-p").select();});
   });
-  DATA_READY=loadAll();DATA_READY["catch"](function(e){
+}
+function hideLogin(){document.body.classList.remove("locked");var el=document.getElementById("login");if(el)el.remove();}
+function sessionEnded(){
+  if(document.body.classList.contains("locked"))return;
+  setAuth(null);CACHE={};M.projects=[];S.projects=[];dropSubs();S.pid=null;S.D=null;
+  showLogin("登入已過期，請重新登入");
+}
+function startData(){
+  applyRO();
+  if(!STARTED){
+    STARTED=true;
+    RT.db=GDB();RT.assets=null;RT.downloads=null;
+    RT.db.collection("projects").onSnapshot(function(sn){
+      M.projects=sn.docs.map(function(x){var v=thaw(x);v.id=x.id;return v;});
+      S.projects=SRV.bootstrap().projects;
+      refresh();
+    });
+    setInterval(function(){if(AUTH.token)poll();},15000);
+    document.addEventListener("visibilitychange",function(){if(!document.hidden&&AUTH.token)poll();});
+  }
+  S.pid=null;S.D=null;render();
+  DATA_READY=loadAll();
+  DATA_READY.then(function(){if(canEdit())runPendingImports();})["catch"](function(e){
+    if(!AUTH.token)return;
     document.getElementById("root").insertAdjacentHTML("afterbegin",
-      '<div class="wrap"><div class="notice bad">讀取資料失敗，請確認 Apps Script 已部署為「所有人」可存取。</div></div>');});
-  if(AUTH.token)checkToken(AUTH.token).then(function(r){
-    if(r&&r.editor){setAuth({user:r.user,role:r.role});DATA_READY.then(runPendingImports);}else setAuth(null);})["catch"](function(){});
-  setInterval(poll,15000);
-  document.addEventListener("visibilitychange",function(){if(!document.hidden)poll();});
+      '<div class="wrap"><div class="notice bad">讀取資料失敗，請重新整理；若持續發生，請確認 Apps Script 已更新並部署為「所有人」可存取。</div></div>');});
+}
+(function boot(){
+  if(!API){document.body.classList.remove("locked");document.getElementById("root").innerHTML=
+      '<div class="wrap"><div class="notice bad">尚未設定後端網址（config.js 的 API_URL）。</div></div>';return;}
+  if(!AUTH.token){showLogin("");return;}
+  document.body.classList.add("locked");
+  checkToken(AUTH.token).then(function(r){
+    if(r&&r.ok&&(r.login||r.editor)){setAuth({user:r.user,role:r.role});hideLogin();startData();}
+    else{setAuth(null);showLogin("");}
+  })["catch"](function(){showLogin("無法連線後端，請檢查網路後重新整理");});
 })();
 </script>
 </body>
